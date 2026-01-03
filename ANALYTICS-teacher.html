@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KB 分析中樞 (旗艦學術版) | Teacher Dashboard v20.39 Concept-Hotspots</title>
+    <title>KB 分析中樞 (旗艦學術版) | Teacher Dashboard v20.40 Academic-Suite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
@@ -211,7 +211,7 @@
     <aside id="sidebar" class="w-64 bg-slate-900 text-slate-400 flex flex-col shadow-2xl flex-shrink-0 md:relative absolute top-0 bottom-0 left-0">
         <div class="p-6 border-b border-slate-800 hidden md:block">
             <h1 class="text-xl font-bold tracking-wider text-white flex items-center"><i class="fas fa-network-wired mr-2 text-blue-500"></i> KB ANALYTICS</h1>
-            <p class="text-xs text-slate-500 mt-1 ml-6">v20.39 Mobile-Ready</p>
+            <p class="text-xs text-slate-500 mt-1 ml-6">v20.40 Academic-Suite</p>
         </div>
         
         <!-- Mobile Header inside sidebar to close -->
@@ -233,6 +233,7 @@
             <button onclick="switchView('students')" id="nav-students" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-r-lg hover:bg-slate-800 transition text-left"><i class="fas fa-users w-5"></i><span>個別學生 (Students)</span></button>
             <button onclick="switchView('topics')" id="nav-topics" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-r-lg hover:bg-slate-800 transition text-left"><i class="fas fa-lightbulb w-5"></i><span>主題與觀點 (Ideas)</span></button>
             <button onclick="switchView('quality')" id="nav-quality" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-r-lg hover:bg-slate-800 transition text-left"><i class="fas fa-microscope w-5"></i><span>言談品質 (Quality)</span></button>
+            <button onclick="switchView('academic')" id="nav-academic" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-r-lg hover:bg-slate-800 transition text-left text-purple-300 hover:text-purple-200"><i class="fas fa-graduation-cap w-5"></i><span>學術深度指標 (Academic)</span></button>
             
             <div class="pt-4 mt-4 border-t border-slate-800">
                 <a href="Knowledge Building Forum.html" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-r-lg hover:bg-slate-800 transition text-left text-blue-400 hover:text-blue-300">
@@ -518,6 +519,62 @@
             </div>
         </div>
 
+        <!-- VIEW 5: 學術深度分析 (New Academic View) -->
+        <div id="view-academic" class="section-view space-y-4 md:space-y-6">
+            <header>
+                <h2 class="text-xl md:text-2xl font-bold text-slate-800 flex items-center">
+                    <i class="fas fa-graduation-cap text-purple-600 mr-2"></i> 學術深度指標 (Academic Insights)
+                </h2>
+                <p class="text-sm text-slate-500">基於國際學習科學期刊 (JLS/ijCSCL) 標準的進階分析指標</p>
+            </header>
+
+            <!-- Row 1: Interaction Impact Matrix (Zhang et al. 2007) -->
+            <div class="card">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h3 class="font-bold text-slate-800">1. 互動影響力矩陣 (Interaction Impact Matrix)</h3>
+                        <p class="text-xs text-slate-500">理論基礎：Zhang et al. (2007) - Socio-cognitive dynamics</p>
+                    </div>
+                    <button class="ref-btn" onclick="openRef('impact_scatter')"><i class="fas fa-book"></i> Ref:</button>
+                </div>
+                <div class="h-[350px] relative">
+                    <canvas id="impactScatterChart"></canvas>
+                </div>
+                <div class="mt-2 text-xs text-slate-500 flex justify-between">
+                    <span>X軸：貢獻產出 (Notes Created)</span>
+                    <span>Y軸：社群影響 (Replies Received)</span>
+                </div>
+            </div>
+
+            <!-- Row 2: Epistemic Fingerprint & KB 12 Principles -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="card">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="font-bold text-slate-800">2. 認知鷹架指紋 (Epistemic Fingerprint)</h3>
+                            <p class="text-xs text-slate-500">比較：全班平均 vs 高產出學生</p>
+                        </div>
+                        <button class="ref-btn" onclick="openRef('scaffold_profile')"><i class="fas fa-book"></i> Ref:</button>
+                    </div>
+                    <div class="h-[300px]">
+                        <canvas id="scaffoldProfileChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card bg-yellow-50 border-l-4 border-yellow-400">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="font-bold text-yellow-800 flex items-center"><i class="fas fa-clipboard-check mr-2"></i> 3. KB 12 原則實證檢核</h3>
+                            <p class="text-xs text-yellow-600">Scardamalia (2002) - Principle-based Analysis</p>
+                        </div>
+                    </div>
+                    <div class="space-y-3 overflow-y-auto h-[300px] custom-scrollbar pr-2" id="kb12-check-list">
+                        <!-- Dynamic Content Generated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <script>
@@ -600,7 +657,7 @@
                 dateTime: new Date(n.date).getTime(), // For sorting
                 topicId: n.topicId,
                 author: n.author,
-                parentId: n.parentId // SYNC FIX: Added parentId to enable relationship analysis
+                parentId: n.parentId 
             }));
 
             // 過濾使用者列表 (只算學生)
@@ -681,6 +738,12 @@
             if (key === 'ego' || key === 'depth_trajectory' || key === 'radar') {
                  return "請參考上方面板中的學生個人詳細數據，以判斷是否需要個別輔導。";
             }
+            if (key === 'impact_scatter') {
+                return "此圖可識別四種學生角色：高效貢獻者（右上）、潛力股（右下）、觀察者（左下）、邊緣者（左上）。理想狀態是全員向右上方移動。";
+            }
+            if (key === 'scaffold_profile') {
+                return "高階知識建構者通常展現出更均衡的鷹架使用比例，特別是「改進」與「整合」的比例會顯著高於平均。";
+            }
             return "數據分析完成。請參考圖表指標進行教學調整。";
         }
 
@@ -747,11 +810,13 @@
                     // CRITICAL: Re-run Content Analysis
                     initTopicContentAnalysis();
                     
-                    // Re-initialize Charts for Quality View if active
+                    // Re-initialize Charts for Quality/Academic View if active
                     const activeViewEl = document.querySelector('.section-view.active');
                     if (activeViewEl && activeViewEl.id === 'view-quality') {
                          initDeepLens(); 
                          initStreamChart();
+                    } else if (activeViewEl && activeViewEl.id === 'view-academic') {
+                        initAcademicAnalysis();
                     }
                 }, 100);
             }
@@ -770,9 +835,14 @@
                     initOverview(db);
                     
                     // Force refresh current view content
+                    const activeViewEl = document.querySelector('.section-view.active');
                     const s1 = document.getElementById('topic-selector-ideas');
-                    if(s1) filterDataByTopic(s1.value); // Trigger re-filter
-                    else initTopicContentAnalysis(); // If not on topics view, ensure it's ready when switched
+                    if(s1) filterDataByTopic(s1.value); 
+                    
+                    // Explicit academic refresh
+                    if (activeViewEl && activeViewEl.id === 'view-academic') {
+                        initAcademicAnalysis();
+                    }
                     
                     document.getElementById('db-status-text').innerText = "Synced: " + new Date().toLocaleTimeString();
                     document.getElementById('db-status-text').className = "text-green-400 font-bold";
@@ -971,6 +1041,7 @@
                 initEvolutionTimeline(); 
                 initTopicContentAnalysis(); 
             }, 100);
+            else if (viewName === 'academic') setTimeout(() => { initAcademicAnalysis(); }, 100);
             else if (viewName === 'overview') setTimeout(() => { initOverview(globalRawDB); }, 100);
             else if (viewName === 'students') {
                 const active = document.querySelector('.active-student');
@@ -1681,6 +1752,207 @@
             }); 
         }
 
+        // --- NEW: ACADEMIC ANALYSIS FUNCTIONS ---
+        let impactScatterChart, scaffoldProfileChart;
+
+        function initAcademicAnalysis() {
+            // 1. Prepare Data
+            const users = Object.values(globalRawDB.userList || {}).filter(u => u.role !== 'teacher');
+            const userStats = {};
+            
+            // Init stats
+            users.forEach(u => {
+                userStats[u.id] = { 
+                    id: u.id, 
+                    name: u.name, 
+                    notesCreated: 0, 
+                    repliesReceived: 0,
+                    scaffolds: { question: 0, extend: 0, improve: 0, riseabove: 0 }
+                };
+            });
+
+            // Calc stats
+            globalAllNotes.forEach(n => {
+                // Out-degree (Notes Created)
+                if (userStats[n.author]) {
+                    userStats[n.author].notesCreated++;
+                    // Scaffold Type
+                    let type = n.type;
+                    if(type === 'counter') type = 'improve'; // Group counter with improve
+                    if(userStats[n.author].scaffolds[type] !== undefined) {
+                        userStats[n.author].scaffolds[type]++;
+                    }
+                }
+
+                // In-degree (Replies Received)
+                if (n.parentId) {
+                    const parentNote = globalAllNotes.find(p => p.id === n.parentId);
+                    if (parentNote && parentNote.author !== n.author && userStats[parentNote.author]) {
+                        userStats[parentNote.author].repliesReceived++;
+                    }
+                }
+            });
+
+            // --- Chart 1: Interaction Impact Matrix ---
+            const scatterData = users.map(u => ({
+                x: userStats[u.id].notesCreated,
+                y: userStats[u.id].repliesReceived,
+                name: u.name
+            }));
+
+            const ctx1 = document.getElementById('impactScatterChart').getContext('2d');
+            if (impactScatterChart) impactScatterChart.destroy();
+            
+            // Calculate Quadrant Lines (Median/Mean)
+            const xValues = scatterData.map(d => d.x);
+            const yValues = scatterData.map(d => d.y);
+            const xAvg = xValues.reduce((a,b)=>a+b,0) / (xValues.length || 1);
+            const yAvg = yValues.reduce((a,b)=>a+b,0) / (yValues.length || 1);
+
+            impactScatterChart = new Chart(ctx1, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: '學生分佈',
+                        data: scatterData,
+                        backgroundColor: (ctx) => {
+                            const v = ctx.raw;
+                            if(!v) return '#94a3b8';
+                            if(v.x > xAvg && v.y > yAvg) return '#22c55e'; // High High (Core)
+                            if(v.x > xAvg && v.y <= yAvg) return '#f59e0b'; // High Low (Potential)
+                            if(v.x <= xAvg && v.y > yAvg) return '#3b82f6'; // Low High (Observer)
+                            return '#ef4444'; // Low Low (Marginal)
+                        },
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => `${ctx.raw.name}: (產出:${ctx.raw.x}, 影響:${ctx.raw.y})`
+                            }
+                        },
+                        annotation: { // Simple lines using plugin logic manually drawn or implied
+                            // Complex plugins omitted for stability, relying on description
+                        },
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: '產出量 (Writing)' }, beginAtZero: true },
+                        y: { title: { display: true, text: '影響力 (Reading/Impact)' }, beginAtZero: true }
+                    }
+                }
+            });
+
+            // --- Chart 2: Epistemic Fingerprint (Stacked Bar) ---
+            // Top 5 active students vs Class Average
+            const sortedUsers = Object.values(userStats).sort((a,b) => b.notesCreated - a.notesCreated).slice(0, 5);
+            
+            // Calc Average Profile
+            const totalScaffolds = { question: 0, extend: 0, improve: 0, riseabove: 0 };
+            let globalNoteCount = 0;
+            Object.values(userStats).forEach(u => {
+                totalScaffolds.question += u.scaffolds.question;
+                totalScaffolds.extend += u.scaffolds.extend;
+                totalScaffolds.improve += u.scaffolds.improve;
+                totalScaffolds.riseabove += u.scaffolds.riseabove;
+                globalNoteCount += u.notesCreated;
+            });
+            
+            const normalize = (val, total) => total > 0 ? ((val/total)*100).toFixed(1) : 0;
+            
+            const labels = ['全班平均', ...sortedUsers.map(u => u.name)];
+            const dataQ = [normalize(totalScaffolds.question, globalNoteCount), ...sortedUsers.map(u => normalize(u.scaffolds.question, u.notesCreated))];
+            const dataE = [normalize(totalScaffolds.extend, globalNoteCount), ...sortedUsers.map(u => normalize(u.scaffolds.extend, u.notesCreated))];
+            const dataI = [normalize(totalScaffolds.improve, globalNoteCount), ...sortedUsers.map(u => normalize(u.scaffolds.improve, u.notesCreated))];
+            const dataR = [normalize(totalScaffolds.riseabove, globalNoteCount), ...sortedUsers.map(u => normalize(u.scaffolds.riseabove, u.notesCreated))];
+
+            const ctx2 = document.getElementById('scaffoldProfileChart').getContext('2d');
+            if (scaffoldProfileChart) scaffoldProfileChart.destroy();
+            scaffoldProfileChart = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: '提問 (Q)', data: dataQ, backgroundColor: '#3b82f6' },
+                        { label: '延伸 (E)', data: dataE, backgroundColor: '#eab308' },
+                        { label: '改進 (I)', data: dataI, backgroundColor: '#22c55e' },
+                        { label: '整合 (R)', data: dataR, backgroundColor: '#a855f7' }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { stacked: true },
+                        y: { stacked: true, max: 100, title: { display: true, text: '百分比 (%)' } }
+                    }
+                }
+            });
+
+            // --- 3. KB 12 Principles Checklist (Logic) ---
+            const checklistContainer = document.getElementById('kb12-check-list');
+            const stats = globalClassStats;
+            
+            const checks = [
+                { 
+                    title: 'Real Ideas, Authentic Problems (真實觀點)', 
+                    pass: stats.totalNotes > 5, 
+                    desc: '社群是否產生了足夠數量的初始觀點？',
+                    val: `${stats.totalNotes} 篇`
+                },
+                { 
+                    title: 'Idea Diversity (觀點多樣性)', 
+                    pass: stats.studentCount > 0 && (stats.totalNotes / stats.studentCount) > 1.5, 
+                    desc: '是否大部分學生都參與了貢獻？',
+                    val: `人均 ${stats.studentCount > 0 ? (stats.totalNotes/stats.studentCount).toFixed(1) : 0} 篇`
+                },
+                { 
+                    title: 'Epistemic Agency (認知主體性)', 
+                    pass: (totalScaffolds.question / globalNoteCount) > 0.1, 
+                    desc: '學生是否主動提出問題與規劃？(提問比例 > 10%)',
+                    val: `提問佔 ${(totalScaffolds.question / globalNoteCount * 100).toFixed(1)}%`
+                },
+                { 
+                    title: 'Community Knowledge (社群知識)', 
+                    pass: parseFloat(stats.density) > 0.3, 
+                    desc: '知識是否在社群間流動？(密度 > 0.3)',
+                    val: `密度 ${stats.density}`
+                },
+                { 
+                    title: 'Improvable Ideas (觀點改進)', 
+                    pass: (totalScaffolds.improve / globalNoteCount) > 0.15, 
+                    desc: '是否有持續改進觀點的跡象？(改進/反駁 > 15%)',
+                    val: `改進佔 ${(totalScaffolds.improve / globalNoteCount * 100).toFixed(1)}%`
+                },
+                { 
+                    title: 'Rise Above (昇華與整合)', 
+                    pass: stats.raRate > 5, 
+                    desc: '是否出現了高階的整合性論述？(昇華率 > 5%)',
+                    val: `${stats.raRate}%`
+                }
+            ];
+
+            checklistContainer.innerHTML = checks.map(c => `
+                <div class="flex items-start p-2 border-b border-yellow-100 last:border-0">
+                    <div class="mr-3 mt-1">
+                        ${c.pass ? '<i class="fas fa-check-circle text-green-500 text-lg"></i>' : '<i class="fas fa-exclamation-circle text-red-400 text-lg"></i>'}
+                    </div>
+                    <div>
+                        <div class="font-bold text-sm text-slate-700">${c.title}</div>
+                        <div class="text-xs text-slate-500">${c.desc}</div>
+                        <div class="text-xs font-mono font-bold ${c.pass ? 'text-green-600' : 'text-red-500'} mt-1">
+                            Current: ${c.val}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
         const refData = {
             'class_diagnosis': { 
                 title: '全班深度診斷 (Deep Diagnosis)',
@@ -1766,6 +2038,16 @@
                 title: '關鍵對話流 (Discourse Stream)',
                 theory: '展現社群討論的動態流量與焦點轉移。有助於識別討論的高峰期與停滯期，作為教師介入引導的時機參考。',
                 cite: 'Reimann, P. (2009). Time is precious: Variable-and event-centred approaches to process analysis.'
+            },
+            'impact_scatter': {
+                title: '互動影響力矩陣 (Impact Matrix)',
+                theory: '參考 Zhang et al. (2007) 的社會認知動力學研究。此矩陣將學生分為四種角色：核心貢獻者（高產出/高影響）、潛力股（高產出/低影響）、觀察者（低產出/高影響）與邊緣者。理想的知識建構社群應呈現全體向右上移動的趨勢。',
+                cite: 'Zhang, J., et al. (2007). Socio-cognitive dynamics of knowledge building in the work of 9-and 10-year-olds.'
+            },
+            'scaffold_profile': {
+                title: '認知鷹架指紋 (Epistemic Fingerprint)',
+                theory: '參考 Chen & Hong (2016) 的研究，學生的鷹架使用模式（Scaffold Usage Patterns）反映了其認知策略。透過比較全班平均與高產出學生的鷹架分佈，教師可識別出「過度依賴提問」或「缺乏深度整合」等認知偏誤。',
+                cite: 'Chen, B., & Hong, H. Y. (2016). Schools as knowledge-building organizations: Design challenges and opportunities.'
             }
         };
 
@@ -1868,6 +2150,19 @@
                  html = `<ul class="list-disc pl-4 space-y-1">
                     <li><strong>綜合評估：</strong>密度 ${d} | 總篇數 ${n} | 整合率 ${r}%。</li>
                     <li><strong>總體建議：</strong>${d < 0.3 ? '目前首要任務是建立連結，請多設計分組互動活動。' : (r < 10 ? '互動良好但深度不足，請示範如何進行觀點昇華。' : '班級運作相當成熟，可挑戰更困難的真實問題。')}</li>
+                </ul>`;
+            }
+            else if (key === 'impact_scatter') {
+                html = `<ul class="list-disc pl-4 space-y-1">
+                    <li><strong><span class="text-green-600">核心貢獻者</span>：</strong>位於右上角，發文多且影響力大，是班級的意見領袖。</li>
+                    <li><strong><span class="text-yellow-600">潛力股</span>：</strong>位於右下角，發文多但回應少，建議老師引導其他同學回應他們。</li>
+                    <li><strong><span class="text-blue-600">觀察者</span>：</strong>位於左上角，發文少但常被引用（可能是一語道破的關鍵發言）。</li>
+                </ul>`;
+            }
+            else if (key === 'scaffold_profile') {
+                html = `<ul class="list-disc pl-4 space-y-1">
+                    <li><strong>模式比較：</strong>此圖比較了「全班平均」與「高活躍學生」的鷹架使用習慣。</li>
+                    <li><strong>診斷：</strong>若某位高活躍學生的「提問(藍色)」條很長但「整合(紫色)」很短，代表他雖然積極但可能缺乏收斂思考，這就是介入的契機。</li>
                 </ul>`;
             }
             else {
