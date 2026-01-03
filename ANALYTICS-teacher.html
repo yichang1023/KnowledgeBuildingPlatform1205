@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KB 分析中樞 (旗艦學術版) | Teacher Dashboard v20.33 Evolution-Fix</title>
+    <title>KB 分析中樞 (旗艦學術版) | Teacher Dashboard v20.34 Hotspot-Key-Fix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
@@ -177,7 +177,7 @@
     <aside class="w-64 bg-slate-900 text-slate-400 flex flex-col shadow-2xl z-20 flex-shrink-0">
         <div class="p-6 border-b border-slate-800">
             <h1 class="text-xl font-bold tracking-wider text-white flex items-center"><i class="fas fa-network-wired mr-2 text-blue-500"></i> KB ANALYTICS</h1>
-            <p class="text-xs text-slate-500 mt-1 ml-6">v20.33 Evolution-Fix</p>
+            <p class="text-xs text-slate-500 mt-1 ml-6">v20.34 Hotspot-Key-Fix</p>
         </div>
         
         <!-- Home Link -->
@@ -1081,7 +1081,8 @@
                 return;
             }
 
-            globalAllNotes.slice(0, 15).forEach((n, i) => {
+            // FIXED: Increased limit from 15 to 50 to show more hotspots for a topic
+            globalAllNotes.slice(0, 50).forEach((n, i) => {
                 let y = 50;
                 if(n.type === 'question') y = 80;
                 else if (n.type === 'improve') y = 60;
@@ -1841,8 +1842,8 @@
                 btn.disabled = false;
                 
                 // Critical Fix: Clear bad keys so user can try again
-                localStorage.removeItem('kb_ai_key');
-                localStorage.removeItem('gemini_api_key');
+                // localStorage.removeItem('kb_ai_key');
+                // localStorage.removeItem('gemini_api_key');
             }
         }
 
