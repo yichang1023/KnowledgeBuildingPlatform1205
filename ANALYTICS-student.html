@@ -151,6 +151,7 @@
              padding: 2px 6px;
              color: #cbd5e1;
              background: transparent;
+             cursor: pointer;
         }
         .ref-btn-mini:hover {
             color: #6366f1;
@@ -271,7 +272,7 @@
                      <!-- 說明 -->
                      <div class="insight-box bg-white/50 border-blue-200 mt-4">
                          <div class="insight-title text-blue-800"><i class="fas fa-info-circle"></i> 角色分析說明</div>
-                         這些指標反映了你在社群中的動態貢獻。數值是根據你相對於全班平均的表現計算得出的百分位數 (Percentile)。每個角色對於知識建構都不可或缺。
+                         這些指標反映了你在社群中的動態貢獻。數值是根據你相對於全班平均的表現計算得出的相對強度 (0-100%)。每個角色對於知識建構都不可或缺。
                      </div>
                  </div>
              </div>
@@ -468,7 +469,7 @@
     const refData = {
         'roles': {
             title: '知識角色 (Epistemic Roles)',
-            theory: '根據 Scardamalia (2002) 的「認識論代理人」，學生應展現多樣化的貢獻模式，如發起者、連結者或整合者。',
+            theory: '根據 Scardamalia (2002) 的「認識論代理人 (Epistemic Agency)」，學生在社群中應展現多樣化的貢獻模式，如發起者、連結者或整合者，而非單一的接收者。',
             cite: 'Scardamalia, M. (2002). Socio-cognitive dynamics of knowledge building.'
         },
         'initiator': {
@@ -556,16 +557,16 @@
         if (s) {
             // New Role Metrics Logic for Modal
             if (key === 'initiator') {
-                statusText = `開創力指標：<strong>${s.roleMetrics.initiator}% (Top ${100-s.roleMetrics.initiator}%)</strong>`;
+                statusText = `開創力強度：<strong>${s.roleMetrics.initiator}%</strong>`;
                 insightText = s.roleMetrics.initiator > 70 ? "你非常善於開啟新的討論話題，是社群的好奇心引擎！" : "試著多發表一些「新問題」或「新想法」來提升此指標。";
             } else if (key === 'builder') {
-                statusText = `連結力指標：<strong>${s.roleMetrics.builder}% (Top ${100-s.roleMetrics.builder}%)</strong>`;
+                statusText = `連結力強度：<strong>${s.roleMetrics.builder}%</strong>`;
                 insightText = s.roleMetrics.builder > 70 ? "你是社群的連結者，善於回應他人，讓對話延續。" : "嘗試多使用「延伸」或「改進」功能回應同學的筆記。";
             } else if (key === 'synthesizer') {
-                statusText = `整合力指標：<strong>${s.roleMetrics.synthesizer}% (Top ${100-s.roleMetrics.synthesizer}%)</strong>`;
+                statusText = `整合力強度：<strong>${s.roleMetrics.synthesizer}%</strong>`;
                 insightText = s.roleMetrics.synthesizer > 60 ? "你具備高階的整合能力，能將分散的觀點歸納為結論。" : "挑戰看看使用「昇華 (Rise-above)」標籤，試著總結大家的討論。";
             } else if (key === 'sustainer') {
-                statusText = `維護力指標：<strong>${s.roleMetrics.sustainer}% (Top ${100-s.roleMetrics.sustainer}%)</strong>`;
+                statusText = `維護力強度：<strong>${s.roleMetrics.sustainer}%</strong>`;
                 insightText = "這是衡量你持續參與和維護討論熱度的指標。";
             }
             // Existing Logic
@@ -670,22 +671,22 @@
     }
 
     // NEW: Dynamic Role Metrics Calculation
-    function calculateRoleMetrics(stats, allStudentsStats) {
-        // 簡單的百分位計算模擬
-        // 在真實場景中，這應該與全班數據比較
-        // 這裡我們用一個假演算法，但基於個人真實數據變化
+    function calculateRoleMetrics(stats) {
+        // 1. Initiator (開創力): 基於 "question" 數量與比例
+        // 假設基準: 至少 1 個問題才開始計分, 5 個滿分
+        const initScore = Math.min((stats.scaffoldCounts.question * 20), 100); 
         
-        // 1. Initiator: 基於 "question" 數量
-        const initScore = Math.min((stats.scaffoldCounts.question * 15), 95) + 5; 
+        // 2. Builder (連結力): 基於 "extend" + "improve" + "linksCount" (發文有 parentId)
+        // 假設基準: 5 次連結滿分
+        const buildScore = Math.min(((stats.scaffoldCounts.extend + stats.scaffoldCounts.improve + stats.linksCount) * 15), 100);
         
-        // 2. Builder: 基於 "extend" + "improve" + "linksCount"
-        const buildScore = Math.min(((stats.scaffoldCounts.extend + stats.scaffoldCounts.improve + stats.linksCount) * 10), 95) + 5;
+        // 3. Synthesizer (整合力): 基於 "riseabove"
+        // 假設基準: 2 次昇華滿分 (因為很難)
+        const synthScore = Math.min((stats.scaffoldCounts.riseabove * 50), 100);
         
-        // 3. Synthesizer: 基於 "riseabove"
-        const synthScore = Math.min((stats.scaffoldCounts.riseabove * 30), 90) + 5;
-        
-        // 4. Sustainer: 基於 "totalNotes" (持續參與)
-        const susScore = Math.min((stats.totalNotes * 5), 90) + 10;
+        // 4. Sustainer (維護力): 基於 "totalNotes" (持續參與度)
+        // 假設基準: 10 篇筆記滿分
+        const susScore = Math.min((stats.totalNotes * 10), 100);
 
         return {
             initiator: Math.floor(initScore),
@@ -747,25 +748,32 @@
             currentUserStats = stats; // Save for Ref Modal
 
             // Update Dynamic Role UI
-            document.getElementById('role-initiator-val').innerText = `Top ${100 - stats.roleMetrics.initiator}%`;
+            document.getElementById('role-initiator-val').innerText = `${stats.roleMetrics.initiator}%`;
             document.getElementById('role-initiator-bar').style.width = `${stats.roleMetrics.initiator}%`;
             
-            document.getElementById('role-builder-val').innerText = `Top ${100 - stats.roleMetrics.builder}%`;
+            document.getElementById('role-builder-val').innerText = `${stats.roleMetrics.builder}%`;
             document.getElementById('role-builder-bar').style.width = `${stats.roleMetrics.builder}%`;
             
-            document.getElementById('role-synthesizer-val').innerText = `Top ${100 - stats.roleMetrics.synthesizer}%`;
+            document.getElementById('role-synthesizer-val').innerText = `${stats.roleMetrics.synthesizer}%`;
             document.getElementById('role-synthesizer-bar').style.width = `${stats.roleMetrics.synthesizer}%`;
             
-            document.getElementById('role-sustainer-val').innerText = `Top ${100 - stats.roleMetrics.sustainer}%`;
+            document.getElementById('role-sustainer-val').innerText = `${stats.roleMetrics.sustainer}%`;
             document.getElementById('role-sustainer-bar').style.width = `${stats.roleMetrics.sustainer}%`;
 
             // Update Role Title based on best metric
             const metrics = stats.roleMetrics;
             let bestRole = '探索者';
-            let bestScore = 0;
+            let bestScore = -1; // Allow 0 to be best if all are 0
+            
+            // Check max score
             if (metrics.initiator > bestScore) { bestScore = metrics.initiator; bestRole = '開創者 (Initiator)'; }
             if (metrics.builder > bestScore) { bestScore = metrics.builder; bestRole = '連結者 (Builder)'; }
             if (metrics.synthesizer > bestScore) { bestScore = metrics.synthesizer; bestRole = '整合者 (Synthesizer)'; }
+            if (metrics.sustainer > bestScore) { bestScore = metrics.sustainer; bestRole = '維護者 (Sustainer)'; }
+
+            // If no activity at all
+            if (stats.totalNotes === 0) bestRole = '新手 (Newcomer)';
+
             document.getElementById('role-title').innerText = bestRole;
             document.getElementById('role-desc').innerHTML = `<i class="fas fa-quote-left text-indigo-300 mr-1"></i> 根據分析，你在「${bestRole.split(' ')[0]}」方面表現最為突出。`;
 
