@@ -388,7 +388,9 @@
                 animFrame: null,
                 // Selection Box State
                 isSelecting: false, selectionStart: {x: 0, y: 0}, selectionCurrent: {x: 0, y: 0},
-                isPanMode: false 
+                isPanMode: false,
+                // Pinch Zoom State
+                isPinching: false, lastPinchDist: 0, startPinchScale: 1
             },
             selectedNodeIds: [],
             composer: { parentId: null, selectedScaffold: null }, profile: null
@@ -723,6 +725,12 @@
                 if(bg) bg.style.backgroundPosition = `${window.state.canvas.offsetX}px ${window.state.canvas.offsetY}px`;
             },
             getCoords: (e) => (e.touches && e.touches.length > 0) ? {x: e.touches[0].clientX, y: e.touches[0].clientY} : {x: e.clientX, y: e.clientY},
+            getDistance: (touches) => {
+                return Math.hypot(
+                    touches[0].clientX - touches[1].clientX,
+                    touches[0].clientY - touches[1].clientY
+                );
+            },
             
             toggleMode: () => {
                 window.state.canvas.isPanMode = !window.state.canvas.isPanMode;
@@ -746,6 +754,14 @@
             },
 
             startPan: (e) => {
+                // Pinch to Zoom Logic
+                if (e.touches && e.touches.length === 2) {
+                    window.state.canvas.isPinching = true;
+                    window.state.canvas.lastPinchDist = window.app.canvas.getDistance(e.touches);
+                    window.state.canvas.startPinchScale = window.state.canvas.scale;
+                    return; // Don't start pan if pinching
+                }
+
                 if(e.target.closest('.node-card')) {
                     const nodeId = e.target.closest('.node-card').id.replace('node-', '');
                     if (!e.shiftKey && !e.ctrlKey && !window.state.selectedNodeIds.includes(nodeId)) {
@@ -786,6 +802,16 @@
                 }
             },
             pan: (e) => {
+                // Pinch to Zoom Logic
+                if (window.state.canvas.isPinching && e.touches && e.touches.length === 2) {
+                    const dist = window.app.canvas.getDistance(e.touches);
+                    const zoomFactor = dist / window.state.canvas.lastPinchDist;
+                    const newScale = window.state.canvas.startPinchScale * zoomFactor;
+                    window.state.canvas.scale = Math.min(Math.max(0.2, newScale), 3);
+                    window.app.canvas.applyTransform();
+                    return;
+                }
+
                 const c = window.app.canvas.getCoords(e);
                 if(window.state.canvas.isDragging) {
                     window.state.canvas.offsetX += c.x - window.state.canvas.lastX;
@@ -831,7 +857,12 @@
                     box.style.height = h + 'px';
                 }
             },
-            handleEnd: () => {
+            handleEnd: (e) => {
+                // Pinch End Logic
+                if (window.state.canvas.isPinching && (!e.touches || e.touches.length < 2)) {
+                    window.state.canvas.isPinching = false;
+                }
+
                 if (window.state.canvas.isDragging) {
                     window.state.canvas.isDragging = false;
                     const cursor = window.state.canvas.isPanMode ? 'grab' : 'default'; 
@@ -1108,8 +1139,8 @@
                     <h2 class="font-bold text-xs md:text-sm truncate px-1">${topic.name}</h2>
                 </div>
                 <div class="flex gap-2 pointer-events-auto">
-                    <button onclick="window.app.canvas.toggleHeatmap()" id="btn-heatmap" class="${window.state.canvas.isHeatmapMode ? 'bg-orange-100 text-orange-600 border-orange-200' : 'bg-white/90 text-slate-500 border-slate-200'} backdrop-blur shadow-sm border rounded-lg px-3 py-1 text-xs font-bold flex items-center gap-1 transition-all hover:scale-105"><i class="fa-solid fa-fire ${window.state.canvas.isHeatmapMode ? 'animate-pulse' : ''}"></i> <span class="hidden md:inline">潛力熱點</span></button>
-                    <button onclick="window.app.canvas.toggleCluster()" id="btn-cluster" class="${window.state.canvas.isClusterMode ? 'bg-purple-100 text-purple-600 border-purple-200' : 'bg-white/90 text-slate-500 border-slate-200'} backdrop-blur shadow-sm border rounded-lg px-3 py-1 text-xs font-bold flex items-center gap-1 transition-all hover:scale-105"><i class="fa-solid fa-sparkles ${window.state.canvas.isClusterMode ? 'text-purple-500' : ''}"></i> <span class="hidden md:inline">語意聚類</span></button>
+                    <button onclick="window.app.canvas.toggleHeatmap()" id="btn-heatmap" class="${window.state.canvas.isHeatmapMode ? 'bg-orange-100 text-orange-600 border-orange-200' : 'bg-white/90 text-slate-500 border-slate-200'} backdrop-blur shadow-sm border rounded-lg px-3 py-1 text-xs font-bold flex items-center gap-1 transition-all hover:scale-105"><i class="fa-solid fa-fire ${window.state.canvas.isHeatmapMode ? 'animate-pulse' : ''}"></i> <span class="text-[10px] md:text-xs">潛力熱點</span></button>
+                    <button onclick="window.app.canvas.toggleCluster()" id="btn-cluster" class="${window.state.canvas.isClusterMode ? 'bg-purple-100 text-purple-600 border-purple-200' : 'bg-white/90 text-slate-500 border-slate-200'} backdrop-blur shadow-sm border rounded-lg px-3 py-1 text-xs font-bold flex items-center gap-1 transition-all hover:scale-105"><i class="fa-solid fa-sparkles ${window.state.canvas.isClusterMode ? 'text-purple-500' : ''}"></i> <span class="text-[10px] md:text-xs">語意聚類</span></button>
                     <div class="bg-white/90 backdrop-blur shadow-sm border rounded-lg p-1 flex">
                         <button onclick="window.app.canvas.fitView()" class="w-8 h-8 flex items-center justify-center hover:bg-slate-100"><i class="fa-solid fa-expand"></i></button>
                         <button onclick="window.app.canvas.zoom(0.1)" class="w-8 h-8 flex items-center justify-center hover:bg-slate-100 hidden md:flex"><i class="fa-solid fa-plus"></i></button>
