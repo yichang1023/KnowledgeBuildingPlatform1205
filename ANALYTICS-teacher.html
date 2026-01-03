@@ -1078,7 +1078,11 @@
             const data = { nodes: new vis.DataSet(nodesData), edges: new vis.DataSet(edgesData) };
             const options = {
                 nodes: { scaling: { min: 10, max: 30 } },
-                edges: { scaling: { min: 1, max: 5 }, smooth: { type: 'continuous' } },
+                edges: { 
+                    scaling: { min: 1, max: 5 }, 
+                    smooth: { type: 'continuous' },
+                    arrows: { to: { enabled: true, scaleFactor: 0.5 } } // Added arrows for concept flow
+                },
                 physics: { stabilization: false, barnesHut: { gravitationalConstant: -2000, springConstant: 0.04 } },
                 interaction: { hover: true, tooltipDelay: 200 }
             };
