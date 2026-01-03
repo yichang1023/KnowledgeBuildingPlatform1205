@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KB 分析中樞 (旗艦學術版) | Teacher Dashboard v20.40 Academic-Suite</title>
+    <title>KB 分析中樞 (旗艦學術版) | Teacher Dashboard v20.41 Individual-Deep-Dive</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
@@ -211,7 +211,7 @@
     <aside id="sidebar" class="w-64 bg-slate-900 text-slate-400 flex flex-col shadow-2xl flex-shrink-0 md:relative absolute top-0 bottom-0 left-0">
         <div class="p-6 border-b border-slate-800 hidden md:block">
             <h1 class="text-xl font-bold tracking-wider text-white flex items-center"><i class="fas fa-network-wired mr-2 text-blue-500"></i> KB ANALYTICS</h1>
-            <p class="text-xs text-slate-500 mt-1 ml-6">v20.40 Academic-Suite</p>
+            <p class="text-xs text-slate-500 mt-1 ml-6">v20.41 Individual-Deep-Dive</p>
         </div>
         
         <!-- Mobile Header inside sidebar to close -->
@@ -336,16 +336,19 @@
                 <!-- Student Detail -->
                 <div class="w-full lg:w-3/4 space-y-6 overflow-y-auto pr-0 lg:pr-2 pb-10 custom-scrollbar" id="student-detail-panel">
                     <div class="card bg-gradient-to-r from-white to-slate-50 border-l-4 border-blue-500" id="profile-card">
-                        <div class="flex flex-row justify-between items-start">
+                        <div class="flex flex-col md:flex-row justify-between items-start gap-4">
                             <div class="flex gap-4 md:gap-5 items-center">
                                 <div id="profile-avatar" class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-blue-100 flex items-center justify-center text-xl md:text-2xl font-bold text-blue-600 border-4 border-white shadow-sm shrink-0">?</div>
                                 <div>
-                                    <h3 class="text-lg md:text-xl font-bold text-slate-800 flex flex-col md:flex-row md:items-center"><span id="profile-name">請選擇學生</span> <span class="text-xs md:text-sm text-slate-400 font-normal md:ml-2" id="profile-id">--</span></h3>
+                                    <div class="flex items-center gap-2">
+                                        <h3 class="text-lg md:text-xl font-bold text-slate-800 flex flex-col md:flex-row md:items-center"><span id="profile-name">請選擇學生</span> <span class="text-xs md:text-sm text-slate-400 font-normal md:ml-2" id="profile-id">--</span></h3>
+                                        <div id="kb-role-badge" class="hidden text-[10px] px-2 py-0.5 rounded-full border bg-gray-100 text-gray-500 font-bold tracking-wide">KB ROLE</div>
+                                    </div>
                                     <div class="flex gap-2 mt-2" id="profile-badges"></div>
                                     <div class="mt-2 text-xs md:text-sm text-slate-600"><i class="fas fa-info-circle text-blue-400 mr-1"></i> <span id="profile-status-text">等待選取...</span></div>
                                 </div>
                             </div>
-                            <div class="text-right">
+                            <div class="text-right flex flex-col items-end">
                                 <div class="text-2xl md:text-3xl font-bold text-slate-800" id="profile-notes-count">0</div>
                                 <div class="text-[10px] md:text-xs text-slate-500 uppercase flex items-center justify-end gap-1">
                                     Total Notes <button class="ref-btn px-1 py-0 h-4 text-[9px]" onclick="openRef('total_notes')"><i class="fas fa-book"></i> Ref</button>
@@ -353,15 +356,64 @@
                             </div>
                         </div>
                     </div>
+                    
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="card"><div class="flex justify-between items-center mb-4"><h4 class="font-bold text-sm text-slate-700 uppercase">認知深度演化 (Depth)</h4><button class="ref-btn" onclick="openRef('depth_trajectory')"><i class="fas fa-book"></i> Ref:</button></div><div class="h-48 relative"><canvas id="studentDepthChart"></canvas></div></div>
-                        <div class="card"><div class="flex justify-between items-center mb-4"><h4 class="font-bold text-sm text-slate-700 uppercase">知識能力 DNA</h4><button class="ref-btn" onclick="openRef('radar')"><i class="fas fa-book"></i> Ref:</button></div><div class="h-48 relative"><canvas id="radarChart"></canvas></div></div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Left: Radar (Enhanced) -->
                         <div class="card">
-                            <div class="flex justify-between items-center mb-2"><h4 class="font-bold text-sm text-slate-700 uppercase mr-2">自我互動圈 (Ego Network)</h4><button class="ref-btn" onclick="openRef('ego')"><i class="fas fa-book"></i> Ref:</button></div>
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="font-bold text-sm text-slate-700 uppercase">KB 核心能力 (Core Competency)</h4>
+                                <button class="ref-btn" onclick="openRef('radar')"><i class="fas fa-book"></i> Ref:</button>
+                            </div>
+                            <div class="h-48 relative"><canvas id="radarChart"></canvas></div>
+                        </div>
+                        
+                        <!-- Right: Ego Network -->
+                        <div class="card">
+                            <div class="flex justify-between items-center mb-2">
+                                <h4 class="font-bold text-sm text-slate-700 uppercase mr-2">自我互動圈 (Ego Network)</h4>
+                                <button class="ref-btn" onclick="openRef('ego')"><i class="fas fa-book"></i> Ref:</button>
+                            </div>
                             <div class="h-48 bg-slate-50 rounded border border-slate-100 relative"><div id="ego-network-container" class="absolute inset-0"></div></div>
                             <div class="text-xs text-right mt-2 text-slate-500" id="ego-metric">顯示該學生與他人的直接互動</div>
+                        </div>
+                    </div>
+
+                    <!-- NEW ROW: Academic Deep Dive -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Socio-Cognitive Balance -->
+                        <div class="card border-t-4 border-indigo-400">
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="font-bold text-sm text-slate-700 flex items-center"><i class="fas fa-balance-scale text-indigo-500 mr-2"></i> 社群認知平衡 (Balance)</h4>
+                                <button class="ref-btn" onclick="openRef('balance')"><i class="fas fa-book"></i> Ref:</button>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <div class="w-1/2 h-32 relative">
+                                    <canvas id="balanceChart"></canvas>
+                                </div>
+                                <div class="w-1/2 text-xs space-y-2">
+                                    <div class="flex justify-between border-b pb-1"><span>發起 (Initiate)</span><span class="font-bold text-blue-600" id="bal-init">0%</span></div>
+                                    <div class="flex justify-between border-b pb-1"><span>協作 (Build-on)</span><span class="font-bold text-green-600" id="bal-build">0%</span></div>
+                                    <div class="text-slate-400 leading-tight">KB 強調觀點的多樣性與改進的平衡。</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Lexical Fingerprint -->
+                        <div class="card border-t-4 border-amber-400">
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="font-bold text-sm text-slate-700 flex items-center"><i class="fas fa-fingerprint text-amber-500 mr-2"></i> 詞彙貢獻指紋 (Keywords)</h4>
+                                <button class="ref-btn" onclick="openRef('lexical_fingerprint')"><i class="fas fa-book"></i> Ref:</button>
+                            </div>
+                            <div class="flex flex-wrap gap-2 h-32 overflow-y-auto content-start" id="student-keywords-container">
+                                <span class="text-xs text-slate-400 italic">請選擇學生以查看其常用概念詞彙...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-6">
+                        <div class="card">
+                            <div class="flex justify-between items-center mb-4"><h4 class="font-bold text-sm text-slate-700 uppercase">認知深度演化 (Depth Trajectory)</h4><button class="ref-btn" onclick="openRef('depth_trajectory')"><i class="fas fa-book"></i> Ref:</button></div>
+                            <div class="h-48 relative"><canvas id="studentDepthChart"></canvas></div>
                         </div>
                         <div class="card border-l-4" id="ai-card"><h4 class="font-bold text-sm text-slate-700 uppercase mb-3 flex items-center"><i class="fas fa-robot mr-2 text-blue-500"></i> AI 綜合行動建議</h4><div class="space-y-3" id="ai-suggestions"><div class="text-sm text-slate-500">請選擇學生以檢視建議。</div></div></div>
                     </div>
@@ -744,6 +796,12 @@
             if (key === 'scaffold_profile') {
                 return "高階知識建構者通常展現出更均衡的鷹架使用比例，特別是「改進」與「整合」的比例會顯著高於平均。";
             }
+            if (key === 'balance') {
+                return "此圖顯示「自主發起」與「協作接話」的平衡。若藍色(發起)過低，代表缺乏主動性；若綠色(協作)過低，代表缺乏社群互動。";
+            }
+            if (key === 'lexical_fingerprint') {
+                return "詞彙指紋顯示該學生最常貢獻的關鍵詞。這有助於識別其在社群中的「專長領域」或關注焦點。";
+            }
             return "數據分析完成。請參考圖表指標進行教學調整。";
         }
 
@@ -817,6 +875,9 @@
                          initStreamChart();
                     } else if (activeViewEl && activeViewEl.id === 'view-academic') {
                         initAcademicAnalysis();
+                    } else if (activeViewEl && activeViewEl.id === 'view-students') {
+                        const active = document.querySelector('.active-student');
+                        if (active) loadStudentData(active.id.replace('student-btn-', ''));
                     }
                 }, 100);
             }
@@ -855,36 +916,50 @@
             }, 600);
         }
 
+        // --- REVISED: ADVANCED STUDENT METRICS ---
         function calculateStudentMetrics(db, userId) {
             if (!db || !db.userList) return null;
             const user = Object.values(db.userList).find(u => u.id === userId);
             if (!user) return null;
             
-            const myNodes = (db.nodes || []).filter(n => n.author === userId);
+            // Filter user notes based on current Topic Filter
+            const myNodes = globalAllNotes.filter(n => n.author === userId);
             const noteCount = myNodes.length;
             const scaffoldCounts = { question:0, extend:0, improve:0, counter:0, riseabove:0 };
-            myNodes.forEach(n => { if (scaffoldCounts[n.type] !== undefined) scaffoldCounts[n.type]++; });
+            let myTextContent = "";
+
+            myNodes.forEach(n => { 
+                if (scaffoldCounts[n.type] !== undefined) scaffoldCounts[n.type]++; 
+                myTextContent += n.title + " " + n.content + " ";
+            });
             
+            // Ego Network & Centrality Logic
             const egoNodes = new Set();
             const egoEdges = [];
             egoNodes.add(userId);
+            let inDegree = 0; // Replies received
+            let outDegree = 0; // Replies given
 
+            // Out-degree: I reply to others
             myNodes.forEach(n => {
                 if(n.parentId) {
-                    const parent = db.nodes.find(p => p.id === n.parentId);
+                    const parent = globalAllNotes.find(p => p.id === n.parentId);
                     if(parent && parent.author !== userId) {
                         egoNodes.add(parent.author);
                         egoEdges.push({from: userId, to: parent.author});
+                        outDegree++;
                     }
                 }
             });
             
-            (db.nodes || []).forEach(n => {
+            // In-degree: Others reply to me
+            globalAllNotes.forEach(n => {
                 if(n.parentId) {
-                    const parent = db.nodes.find(p => p.id === n.parentId);
+                    const parent = globalAllNotes.find(p => p.id === n.parentId);
                     if(parent && parent.author === userId && n.author !== userId) {
                         egoNodes.add(n.author);
                         egoEdges.push({from: n.author, to: userId});
+                        inDegree++;
                     }
                 }
             });
@@ -901,6 +976,57 @@
                 };
             });
 
+            // 1. EPISTEMIC ROLE LOGIC (Zhang et al.)
+            let role = "參與者 (Participant)";
+            let badgeColor = "bg-gray-100 text-gray-500 border-gray-200";
+            
+            if (noteCount > 0) {
+                const qRatio = scaffoldCounts.question / noteCount;
+                const rRatio = scaffoldCounts.riseabove / noteCount;
+                const iRatio = (scaffoldCounts.improve + scaffoldCounts.counter) / noteCount;
+                
+                if (rRatio > 0.1 || scaffoldCounts.riseabove > 2) {
+                    role = "整合者 (Synthesizer)";
+                    badgeColor = "bg-purple-100 text-purple-600 border-purple-200";
+                } else if (qRatio > 0.3) {
+                    role = "提問者 (Inquirer)";
+                    badgeColor = "bg-blue-100 text-blue-600 border-blue-200";
+                } else if (iRatio > 0.4) {
+                    role = "深化者 (Developer)";
+                    badgeColor = "bg-green-100 text-green-600 border-green-200";
+                } else if (outDegree > 5) {
+                    role = "連結者 (Connector)";
+                    badgeColor = "bg-yellow-100 text-yellow-600 border-yellow-200";
+                }
+            }
+
+            // 2. LEXICAL FINGERPRINT (Keyword Extraction)
+            const stopWords = ['的','是','在','有','和','了','與','就','也','但','我','你','他','我們','嗎','吧','個','這','那','不','人','都','很','？','！','。','，','：','...'];
+            const tokens = myTextContent.toLowerCase().split(/[\s,，.。:：!?！？"”'’()（）]+/);
+            const freq = {};
+            tokens.forEach(w => {
+                if(w.length > 1 && !stopWords.includes(w) && isNaN(w)) freq[w] = (freq[w] || 0) + 1;
+            });
+            const topKeywords = Object.entries(freq).sort((a,b) => b[1] - a[1]).slice(0, 8).map(k => `${k[0]} (${k[1]})`);
+
+            // 3. SOCIO-COGNITIVE BALANCE
+            // Initiate = Notes without parent OR parent is self (new thread/self-reflection)
+            // Collaborate = Notes with parent (replying to others)
+            const initiateCount = myNodes.filter(n => !n.parentId).length;
+            const collaborateCount = myNodes.length - initiateCount;
+            const balanceData = [initiateCount, collaborateCount];
+
+            // 4. RADAR CHART DATA (Mapped to KB 12 Principles)
+            // Agency (Question/RiseAbove), Community (In/Out Degree), Idea Imp (Improve), Synthesis (RiseAbove), Sustained (Trend - simplified here as consistency)
+            const agencyScore = Math.min((scaffoldCounts.question + scaffoldCounts.riseabove) * 15, 100);
+            const communityScore = Math.min((inDegree + outDegree) * 10 + 20, 100);
+            const ideaImpScore = Math.min((scaffoldCounts.improve + scaffoldCounts.counter) * 20, 100);
+            const synthesisScore = Math.min(scaffoldCounts.riseabove * 30, 100);
+            const inquiryScore = Math.min(noteCount * 10, 100); // Volume as proxy for sustained inquiry
+
+            const radarData = [agencyScore, communityScore, ideaImpScore, synthesisScore, inquiryScore];
+
+            // Depth Trend
             const sortedNodes = myNodes.sort((a,b) => a.date - b.date).slice(-5);
             const depthTrend = sortedNodes.map(n => {
                 if(n.type === 'riseabove') return 5;
@@ -920,13 +1046,10 @@
 
             return { 
                 user, noteCount, scaffoldCounts, visNodes, visEdges: egoEdges, depthTrend, suggestions, 
-                radarData: [
-                    Math.min(scaffoldCounts.question * 10 + 20, 100), 
-                    Math.min(scaffoldCounts.extend * 10 + 20, 100), 
-                    Math.min(scaffoldCounts.improve * 10 + 20, 100), 
-                    Math.min(scaffoldCounts.riseabove * 20, 100), 
-                    Math.min(egoEdges.length * 15 + 10, 100)
-                ] 
+                radarData, 
+                role, badgeColor,
+                topKeywords,
+                balanceData
             };
         }
 
@@ -955,7 +1078,8 @@
             });
         }
 
-        let radarChartInstance, studentDepthChartInstance, egoNetworkInstance;
+        let radarChartInstance, studentDepthChartInstance, egoNetworkInstance, balanceChartInstance;
+        
         function loadStudentData(userId) {
             const db = getRealData();
             const data = calculateStudentMetrics(db, userId);
@@ -965,28 +1089,76 @@
             const btn = document.getElementById(`student-btn-${userId}`);
             if(btn) btn.classList.add('active-student', 'bg-indigo-50', 'border-indigo-200');
             
+            // Update Profile Info
             document.getElementById('profile-name').innerText = data.user.name;
             document.getElementById('profile-id').innerText = data.user.id;
             document.getElementById('profile-notes-count').innerText = data.noteCount;
             document.getElementById('profile-avatar').innerText = data.user.name[0];
             document.getElementById('profile-status-text').innerText = "數據分析完成";
+            
+            // Update Role Badge
+            const badge = document.getElementById('kb-role-badge');
+            badge.innerText = data.role;
+            badge.className = `text-[10px] px-2 py-0.5 rounded-full border font-bold tracking-wide ${data.badgeColor}`;
+            badge.classList.remove('hidden');
+
             document.getElementById('ai-suggestions').innerHTML = data.suggestions.map(s => `<div class="flex gap-2 items-start"><i class="fas fa-check-circle text-green-500 mt-1 shrink-0"></i><div class="text-sm text-slate-700 leading-relaxed">${s}</div></div>`).join('');
             document.getElementById('ego-metric').innerText = `連結強度: ${data.visEdges.length} 條連線 (In+Out)`;
 
+            // Update Keywords
+            const kwContainer = document.getElementById('student-keywords-container');
+            if (data.topKeywords.length > 0) {
+                kwContainer.innerHTML = data.topKeywords.map(k => `<span class="bg-amber-50 text-amber-700 border border-amber-200 px-2 py-1 rounded text-xs">${k}</span>`).join('');
+            } else {
+                kwContainer.innerHTML = '<span class="text-xs text-slate-400">尚無足夠內容提取詞彙</span>';
+            }
+
+            // Chart 1: Radar (KB Principles)
             const ctxR = document.getElementById('radarChart').getContext('2d');
             if(radarChartInstance) radarChartInstance.destroy();
-            radarChartInstance = new Chart(ctxR, { type: 'radar', data: { labels: ['提問力','延伸力','改進力','整合力','社交力'], datasets: [{ label: data.user.name, data: data.radarData, backgroundColor:'rgba(59,130,246,0.2)', borderColor:'#3B82F6', pointBackgroundColor: '#3B82F6' }] }, options: { responsive:true, maintainAspectRatio:false, scales: { r: { suggestedMin: 0, suggestedMax: 100, ticks:{display:false} } }, plugins:{legend:{display:false}} } });
+            radarChartInstance = new Chart(ctxR, { type: 'radar', data: { labels: ['主體性 Agency','社群互動 Community','觀點改進 Idea Imp','昇華整合 Synthesis','持續探究 Inquiry'], datasets: [{ label: data.user.name, data: data.radarData, backgroundColor:'rgba(59,130,246,0.2)', borderColor:'#3B82F6', pointBackgroundColor: '#3B82F6' }] }, options: { responsive:true, maintainAspectRatio:false, scales: { r: { suggestedMin: 0, suggestedMax: 100, ticks:{display:false} } }, plugins:{legend:{display:false}} } });
 
-            const ctxD = document.getElementById('studentDepthChart').getContext('2d');
-            if(studentDepthChartInstance) studentDepthChartInstance.destroy();
-            studentDepthChartInstance = new Chart(ctxD, { type: 'line', data: { labels: ['Note 1','Note 2','Note 3','Note 4','Latest'], datasets: [{ label:'認知深度', data: data.depthTrend, borderColor:'#8B5CF6', backgroundColor: 'rgba(139, 92, 246, 0.1)', fill: true, tension:0.4 }] }, options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{min:0, max:5, ticks:{stepSize:1}}} } });
-
+            // Chart 2: Ego Network
             const container = document.getElementById('ego-network-container');
             if(egoNetworkInstance) { egoNetworkInstance.destroy(); egoNetworkInstance = null; }
             const nodes = new vis.DataSet(data.visNodes);
             const edges = new vis.DataSet(data.visEdges);
             egoNetworkInstance = new vis.Network(container, { nodes, edges }, { nodes: { shape: 'dot', font: { face: 'Noto Sans TC' } }, edges: { arrows: 'to', color: '#cbd5e1' }, physics: { stabilization: true }, interaction: { zoomView: false } });
             setTimeout(() => egoNetworkInstance.fit(), 100);
+
+            // Chart 3: Balance (Doughnut)
+            const ctxB = document.getElementById('balanceChart').getContext('2d');
+            if(balanceChartInstance) balanceChartInstance.destroy();
+            
+            // Calculate Percentages for display
+            const totalBal = data.balanceData[0] + data.balanceData[1];
+            const initPct = totalBal > 0 ? Math.round(data.balanceData[0]/totalBal*100) : 0;
+            const buildPct = totalBal > 0 ? Math.round(data.balanceData[1]/totalBal*100) : 0;
+            document.getElementById('bal-init').innerText = initPct + '%';
+            document.getElementById('bal-build').innerText = buildPct + '%';
+
+            balanceChartInstance = new Chart(ctxB, {
+                type: 'doughnut',
+                data: {
+                    labels: ['自主發起', '協作接話'],
+                    datasets: [{
+                        data: data.balanceData,
+                        backgroundColor: ['#3b82f6', '#22c55e'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // Chart 4: Depth Trend
+            const ctxD = document.getElementById('studentDepthChart').getContext('2d');
+            if(studentDepthChartInstance) studentDepthChartInstance.destroy();
+            studentDepthChartInstance = new Chart(ctxD, { type: 'line', data: { labels: ['Note 1','Note 2','Note 3','Note 4','Latest'], datasets: [{ label:'認知深度', data: data.depthTrend, borderColor:'#8B5CF6', backgroundColor: 'rgba(139, 92, 246, 0.1)', fill: true, tension:0.4 }] }, options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{min:0, max:5, ticks:{stepSize:1}}} } });
             
             // Scroll to detail panel on mobile if needed
             if(window.innerWidth < 1024) {
@@ -2048,6 +2220,16 @@
                 title: '認知鷹架指紋 (Epistemic Fingerprint)',
                 theory: '參考 Chen & Hong (2016) 的研究，學生的鷹架使用模式（Scaffold Usage Patterns）反映了其認知策略。透過比較全班平均與高產出學生的鷹架分佈，教師可識別出「過度依賴提問」或「缺乏深度整合」等認知偏誤。',
                 cite: 'Chen, B., & Hong, H. Y. (2016). Schools as knowledge-building organizations: Design challenges and opportunities.'
+            },
+            'balance': {
+                title: '社群認知平衡 (Socio-Cognitive Balance)',
+                theory: '理想的知識建構者應兼顧「自主探究（發起新討論）」與「社群協作（回應他人）」。此圖表顯示學生的行為模式是否過度偏向某一方（例如只問不答，或只答不問）。',
+                cite: 'Scardamalia, M. (2002). Collective cognitive responsibility for the advancement of knowledge.'
+            },
+            'lexical_fingerprint': {
+                title: '詞彙貢獻指紋 (Lexical Contribution Fingerprint)',
+                theory: '透過分析學生筆記中的高頻關鍵詞，我們可以識別該學生在社群知識庫中的「獨特貢獻領域」。這是評估「觀點多樣性」與「專業知識互補」的重要指標。',
+                cite: 'Bereiter, C. (2002). Education and mind in the knowledge age.'
             }
         };
 
@@ -2163,6 +2345,19 @@
                 html = `<ul class="list-disc pl-4 space-y-1">
                     <li><strong>模式比較：</strong>此圖比較了「全班平均」與「高活躍學生」的鷹架使用習慣。</li>
                     <li><strong>診斷：</strong>若某位高活躍學生的「提問(藍色)」條很長但「整合(紫色)」很短，代表他雖然積極但可能缺乏收斂思考，這就是介入的契機。</li>
+                </ul>`;
+            }
+            else if (key === 'balance') {
+                html = `<ul class="list-disc pl-4 space-y-1">
+                    <li><strong>自主發起：</strong>學生主動提出新問題或新觀點的比例。過高可能代表不願傾聽他人。</li>
+                    <li><strong>協作接話：</strong>回應、延伸或改進他人觀點的比例。過高可能代表缺乏原創性想法。</li>
+                    <li><strong>理想狀態：</strong>健康的知識建構者應兩者兼備，保持動態平衡。</li>
+                </ul>`;
+            }
+            else if (key === 'lexical_fingerprint') {
+                html = `<ul class="list-disc pl-4 space-y-1">
+                    <li><strong>概念指紋：</strong>這是該學生最常使用的學術詞彙，反映了他的關注焦點。</li>
+                    <li><strong>教學應用：</strong>若發現某學生的關鍵詞與全班主流不同，可能代表他正在開闢新的探究路徑，值得鼓勵分享。</li>
                 </ul>`;
             }
             else {
