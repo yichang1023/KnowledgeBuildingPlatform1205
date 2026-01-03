@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KB 分析中樞 (旗艦學術版) | Teacher Dashboard v20.37 Mobile-Ready</title>
+    <title>KB 分析中樞 (旗艦學術版) | Teacher Dashboard v20.38 Data-Synced</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
@@ -599,7 +599,8 @@
                 date: new Date(n.date).toLocaleDateString(),
                 dateTime: new Date(n.date).getTime(), // For sorting
                 topicId: n.topicId,
-                author: n.author
+                author: n.author,
+                parentId: n.parentId // SYNC FIX: Added parentId to enable relationship analysis
             }));
 
             // 過濾使用者列表 (只算學生)
@@ -1161,12 +1162,12 @@
             lexicalChartInstance = new Chart(ctx, { type: 'line', data: { labels: ['Week 1', 'Week 2', 'Week 3', 'Current'], datasets: [{ label: '關鍵字彙累積 (Keyword Accumulation)', data: dataPoints, borderColor: '#8b5cf6', backgroundColor: 'rgba(139, 92, 246, 0.1)', fill: true, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false } }); 
         }
 
-        // NEW: Dynamic Promisingness Chart with Click Interaction
+        // NEW: Dynamic Promisingness Chart with Click Interaction (SYNC FIXED)
         function initPromisingnessChart() {
             const container = document.getElementById('promisingness-container');
             container.innerHTML = `
-                <div class="absolute bottom-2 right-4 text-xs font-bold text-slate-400">關注度 →</div>
-                <div class="absolute top-4 left-2 text-xs font-bold text-slate-400 rotate-90 origin-left">← 認知落差</div>
+                <div class="absolute bottom-2 right-4 text-xs font-bold text-slate-400">關注度 (Interest) →</div>
+                <div class="absolute top-4 left-2 text-xs font-bold text-slate-400 rotate-90 origin-left">← 認知落差 (Cognitive Gap)</div>
                 <div class="absolute top-1/2 left-0 right-0 h-px bg-slate-300 border-t border-dashed"></div>
                 <div class="absolute left-1/2 top-0 bottom-0 w-px bg-slate-300 border-l border-dashed"></div>
                 <div class="absolute top-2 right-2 text-[10px] text-slate-300 bg-slate-100 px-1 rounded">Count: ${globalAllNotes.length}</div>
@@ -1177,15 +1178,37 @@
                 return;
             }
 
+            // 1. Calculate Interest (Reply Count)
+            const replyCounts = {};
+            globalAllNotes.forEach(n => replyCounts[n.id] = 0);
+            globalAllNotes.forEach(n => {
+                if (n.parentId && replyCounts[n.parentId] !== undefined) {
+                    replyCounts[n.parentId]++;
+                }
+            });
+            const maxReplies = Math.max(...Object.values(replyCounts), 1);
+
             globalAllNotes.forEach((n, i) => {
-                let y = 50;
-                if(n.type === 'question') y = 80;
-                else if (n.type === 'improve') y = 60;
-                else if (n.type === 'riseabove') y = 70;
-                else y = 30;
-                // Minor random jitter to prevent perfect overlap
-                y += (Math.random() * 20 - 10);
-                let x = Math.random() * 80 + 10;
+                // Y-Axis: Cognitive Gap / Potential based on Scaffolds
+                let y = 30; // Default (Base)
+                if (n.type === 'question') y = 85; // Questions imply a gap
+                else if (n.type === 'riseabove') y = 75; // Synthesis addresses gaps
+                else if (n.type === 'improve') y = 60; // Improvements fill gaps
+                else if (n.type === 'counter') y = 65; // Conflicts create gaps
+                else if (n.type === 'extend') y = 40; // Extensions add data
+                
+                // Add small deterministic jitter based on ID char code to separate overlaps
+                const idSum = n.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+                y += (idSum % 10 - 5); 
+
+                // X-Axis: Community Interest (Replies)
+                const replies = replyCounts[n.id] || 0;
+                let x = 10 + (replies / maxReplies) * 80;
+                x += (idSum % 10 - 5); // Jitter
+
+                // Boundary checks
+                x = Math.max(5, Math.min(95, x));
+                y = Math.max(5, Math.min(95, y));
 
                 const dot = document.createElement('div');
                 dot.className = 'absolute cursor-pointer group hover:scale-125 transition-transform z-10'; // Added z-10
