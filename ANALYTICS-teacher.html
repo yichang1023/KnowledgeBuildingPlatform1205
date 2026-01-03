@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KB 分析中樞 (旗艦學術版) | Teacher Dashboard v20.38 Data-Synced</title>
+    <title>KB 分析中樞 (旗艦學術版) | Teacher Dashboard v20.39 Concept-Hotspots</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
@@ -211,7 +211,7 @@
     <aside id="sidebar" class="w-64 bg-slate-900 text-slate-400 flex flex-col shadow-2xl flex-shrink-0 md:relative absolute top-0 bottom-0 left-0">
         <div class="p-6 border-b border-slate-800 hidden md:block">
             <h1 class="text-xl font-bold tracking-wider text-white flex items-center"><i class="fas fa-network-wired mr-2 text-blue-500"></i> KB ANALYTICS</h1>
-            <p class="text-xs text-slate-500 mt-1 ml-6">v20.37 Mobile-Ready</p>
+            <p class="text-xs text-slate-500 mt-1 ml-6">v20.39 Mobile-Ready</p>
         </div>
         
         <!-- Mobile Header inside sidebar to close -->
@@ -393,7 +393,7 @@
                     <div class="flex justify-between items-center mb-4">
                         <div>
                             <h3 class="font-bold text-slate-800">2. 概念語義網絡 (Concept Space)</h3>
-                            <p class="text-xs text-slate-500">互動式共現網絡：點擊節點可查看來源文章</p>
+                            <p class="text-xs text-slate-500">互動式共現網絡：<span class='text-red-500 font-bold'>●</span> 熱點觀點 | 點擊查看</p>
                         </div>
                         <button class="ref-btn" onclick="openRef('concept_network')"><i class="fas fa-book"></i> Ref:</button>
                     </div>
@@ -1010,8 +1010,29 @@
 
             const stopWords = ['的','是','在','有','和','了','與','就','也','但','我','你','他','我們','嗎','吧','個','這','那','不','人','都','很','？','！','。','，','：','...','嗎','呢','啊'];
             
-            // 1. Extract Keywords and map to Notes (Includes Content now)
-            const keywordMap = {}; // { word: [noteId1, noteId2, ...] }
+            // 1. Logic for Hotness (Reply Counts & Note Types)
+            const replyCounts = {};
+            globalAllNotes.forEach(n => replyCounts[n.id] = 0);
+            globalAllNotes.forEach(n => {
+                if (n.parentId && replyCounts[n.parentId] !== undefined) {
+                    replyCounts[n.parentId]++;
+                }
+            });
+
+            // Calculate Heat for each Note
+            const getNoteHeat = (n) => {
+                let typeScore = 1; // Base: Extend/General
+                if (n.type === 'riseabove') typeScore = 4; // High value
+                else if (n.type === 'question') typeScore = 3; // Questions drive inquiry
+                else if (n.type === 'improve' || n.type === 'counter') typeScore = 2; // Improvement
+                
+                const replies = replyCounts[n.id] || 0;
+                // Heat = Type Weight + Engagement
+                return typeScore + (replies * 0.8);
+            };
+
+            // 2. Extract Keywords
+            const keywordMap = {}; 
             
             globalAllNotes.forEach(n => {
                 const text = (n.title + " " + n.content).toLowerCase();
@@ -1041,15 +1062,43 @@
                  return;
             }
 
-            // 3. Build Nodes
-            const nodesData = sortedKeywords.map((w, i) => ({ 
-                id: w, 
-                label: `${w}\n(${keywordMap[w].length})`, 
-                value: keywordMap[w].length, // Size based on frequency
-                color: { background: '#dbeafe', border: '#3b82f6' },
-                font: { size: 14, color: '#1e3a8a' },
-                shape: 'dot'
-            }));
+            // 3. Build Nodes with Hotness Colors
+            const nodesData = sortedKeywords.map((w, i) => {
+                const noteIds = keywordMap[w];
+                let totalHeat = 0;
+                noteIds.forEach(nid => {
+                    const n = globalAllNotes.find(x => x.id === nid);
+                    if(n) totalHeat += getNoteHeat(n);
+                });
+                
+                // Average Heat per occurrence to determine "Concept Potency"
+                const avgHeat = totalHeat / noteIds.length;
+                
+                let color = { background: '#dbeafe', border: '#3b82f6' }; // Blue (Cool/Base)
+                let font = { size: 14, color: '#1e3a8a' };
+                let shadow = false;
+
+                if (avgHeat >= 3.0) { 
+                    // Hotspot: High conceptual level (RiseAbove) or High Engagement
+                    color = { background: '#fee2e2', border: '#ef4444' }; // Red
+                    font = { size: 16, color: '#b91c1c', face: 'Noto Sans TC', bold: true };
+                    shadow = { enabled: true, color: 'rgba(239,68,68,0.5)', size: 10 };
+                } else if (avgHeat >= 2.0) {
+                    // Warm: Questions/Improvements
+                    color = { background: '#fef3c7', border: '#f59e0b' }; // Yellow/Orange
+                    font = { size: 14, color: '#92400e' };
+                }
+
+                return { 
+                    id: w, 
+                    label: `${w}\n(${noteIds.length})`, 
+                    value: noteIds.length, 
+                    color: color,
+                    font: font,
+                    shape: 'dot',
+                    shadow: shadow
+                };
+            });
 
             // 4. Build Edges (Co-occurrence in notes)
             const edgesData = [];
