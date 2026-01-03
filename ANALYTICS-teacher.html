@@ -562,7 +562,18 @@
             document.getElementById('total-notes-count').innerText = stats.totalNotes; document.getElementById('network-density').innerText = stats.density; document.getElementById('rise-above-rate').innerText = stats.raRate + '%'; document.getElementById('risk-student-count').innerText = stats.riskCount;
             
             const container = document.getElementById('overview-network-container'); if(overviewNetwork) { overviewNetwork.destroy(); overviewNetwork = null; }
-            const nodesData = stats.students.map((u, i) => ({ id: u.id, label: u.name, color: '#3b82f6', shape: 'dot', size: 10 }));
+            
+            // Generate distinct colors for each student
+            const colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16', '#f43f5e', '#6366f1'];
+            const nodesData = stats.students.map((u, i) => ({ 
+                id: u.id, 
+                label: u.name, 
+                color: colors[i % colors.length], // Cycle through colors
+                shape: 'dot', 
+                size: 10,
+                font: { color: '#1e293b' }
+            }));
+            
             const edgesData = []; stats.nodes.forEach(n => { if(n.parentId) { const p = stats.nodes.find(x => x.id === n.parentId); if(p && p.author !== n.author) edgesData.push({from: n.author, to: p.author}); } });
             overviewNetwork = new vis.Network(container, { nodes: new vis.DataSet(nodesData), edges: new vis.DataSet(edgesData) }, { physics: { stabilization: true } });
             
