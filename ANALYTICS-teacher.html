@@ -260,6 +260,11 @@
             <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
                 <div><h2 class="text-xl md:text-2xl font-bold text-slate-800">班級社群脈動</h2><p class="text-sm text-slate-500">全班知識建構狀態與集體責任指標</p></div>
                 <div class="flex gap-2 items-center w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
+                    <!-- NEW: Overview Topic Selector -->
+                    <select id="topic-selector-overview" onchange="filterDataByTopic(this.value)" class="bg-white border border-slate-300 text-slate-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 shadow-sm">
+                        <option value="all" selected>所有主題 (All Topics)</option>
+                    </select>
+                    
                     <button onclick="openRef('class_diagnosis')" class="ai-btn bg-purple-600 hover:bg-purple-700 shadow-md whitespace-nowrap">
                         <i class="fas fa-brain mr-2"></i> 全班深度診斷
                     </button>
@@ -821,6 +826,7 @@
         function populateTopicSelectors(topics) {
             const s1 = document.getElementById('topic-selector-ideas');
             const s2 = document.getElementById('topic-selector-quality');
+            const s3 = document.getElementById('topic-selector-overview'); // NEW Selector
             const currentVal = activeTopicFilter;
             
             let options = `<option value="all">所有主題 (All Topics)</option>`;
@@ -833,20 +839,24 @@
             // Force update to ensure options are always current
             if (s1) s1.innerHTML = options;
             if (s2) s2.innerHTML = options;
+            if (s3) s3.innerHTML = options; // Populate Overview selector
             
             // Restore selection if valid, else default to 'all'
             if (s1 && [...s1.options].some(o => o.value === currentVal)) s1.value = currentVal;
             if (s2 && [...s2.options].some(o => o.value === currentVal)) s2.value = currentVal;
+            if (s3 && [...s3.options].some(o => o.value === currentVal)) s3.value = currentVal; // Sync Overview selector
         }
 
         function filterDataByTopic(topic) {
             activeTopicFilter = topic;
             
-            // Sync both selectors
+            // Sync all selectors
             const s1 = document.getElementById('topic-selector-ideas');
             const s2 = document.getElementById('topic-selector-quality');
+            const s3 = document.getElementById('topic-selector-overview');
             if(s1) s1.value = topic;
             if(s2) s2.value = topic;
+            if(s3) s3.value = topic;
 
             if (globalRawDB && globalRawDB.nodes) {
                 // Re-calculate global stats (updates globalAllNotes)
@@ -859,17 +869,17 @@
                 document.getElementById('topic-content-log').innerHTML = '<div class="text-center py-10 text-slate-400"><i class="fas fa-spinner fa-spin mr-2"></i>載入中...</div>';
                 
                 setTimeout(() => { 
-                    // Re-initialize Charts for Topics View
+                    // Re-initialize Charts based on active view
+                    const activeViewEl = document.querySelector('.section-view.active');
+                    
+                    // Always re-run analysis functions that depend on globalAllNotes
+                    // This ensures "Ideas" view is ready even if hidden
                     initConceptNetwork(); 
                     initLexicalChart(); 
                     initPromisingnessChart();
                     initEvolutionTimeline();
-                    
-                    // CRITICAL: Re-run Content Analysis
                     initTopicContentAnalysis();
                     
-                    // Re-initialize Charts for Quality/Academic View if active
-                    const activeViewEl = document.querySelector('.section-view.active');
                     if (activeViewEl && activeViewEl.id === 'view-quality') {
                          initDeepLens(); 
                          initStreamChart();
@@ -879,6 +889,7 @@
                         const active = document.querySelector('.active-student');
                         if (active) loadStudentData(active.id.replace('student-btn-', ''));
                     }
+                    // Overview is handled by initOverview called above
                 }, 100);
             }
         }
