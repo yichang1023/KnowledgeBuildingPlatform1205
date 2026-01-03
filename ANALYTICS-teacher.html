@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KB 分析中樞 (旗艦學術版) | Teacher Dashboard v20.31 Content-Sync-Final</title>
+    <title>KB 分析中樞 (旗艦學術版) | Teacher Dashboard v20.32 Concept-Link-Upgrade</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
@@ -177,7 +177,7 @@
     <aside class="w-64 bg-slate-900 text-slate-400 flex flex-col shadow-2xl z-20 flex-shrink-0">
         <div class="p-6 border-b border-slate-800">
             <h1 class="text-xl font-bold tracking-wider text-white flex items-center"><i class="fas fa-network-wired mr-2 text-blue-500"></i> KB ANALYTICS</h1>
-            <p class="text-xs text-slate-500 mt-1 ml-6">v20.31 Content-Sync-Final</p>
+            <p class="text-xs text-slate-500 mt-1 ml-6">v20.32 Concept-Link-Upgrade</p>
         </div>
         
         <!-- Home Link -->
@@ -339,9 +339,15 @@
                         <div class="absolute top-1/2 left-0 right-0 h-px bg-slate-300 border-t border-dashed"></div><div class="absolute left-1/2 top-0 bottom-0 w-px bg-slate-300 border-l border-dashed"></div>
                     </div>
                 </div>
-                <!-- 2. 概念語義網絡 -->
+                <!-- 2. 概念語義網絡 (升級版) -->
                 <div class="card h-[400px]">
-                    <div class="flex justify-between items-center mb-4"><div><h3 class="font-bold text-slate-800">2. 概念語義網絡 (Concept Space)</h3><p class="text-xs text-slate-500">關鍵字連結結構</p></div><button class="ref-btn" onclick="openRef('concept_network')"><i class="fas fa-book"></i> Ref:</button></div>
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="font-bold text-slate-800">2. 概念語義網絡 (Concept Space)</h3>
+                            <p class="text-xs text-slate-500">互動式共現網絡：點擊節點可查看來源文章</p>
+                        </div>
+                        <button class="ref-btn" onclick="openRef('concept_network')"><i class="fas fa-book"></i> Ref:</button>
+                    </div>
                     <div id="concept-network-container" class="h-full bg-slate-50 rounded border border-slate-100"></div>
                 </div>
                 <!-- 3. 學術詞彙成長 -->
@@ -892,29 +898,154 @@
             });
         }
         
+        // --- UPGRADED CONCEPT NETWORK ---
+        let conceptNetworkInstance = null; // Store instance globally to handle events
+
         function initConceptNetwork() { 
             const container = document.getElementById('concept-network-container'); 
-            const words = [];
+            // Clear previous network if exists
+            if(conceptNetworkInstance) { conceptNetworkInstance.destroy(); conceptNetworkInstance = null; }
+
+            const stopWords = ['的','是','在','有','和','了','與','就','也','但','我','你','他','我們','嗎','吧','個','這','那','不','人','都','很','？','！','。','，','：','...','嗎','呢','啊'];
+            
+            // 1. Extract Keywords and map to Notes (Includes Content now)
+            const keywordMap = {}; // { word: [noteId1, noteId2, ...] }
+            
             globalAllNotes.forEach(n => {
-                if(n.title) {
-                    let tokens = n.title.split(/[ \u3000,，.。:：!?！？"”'’]+/);
-                    tokens.forEach(t => { 
-                        if(t && t.length > 1) words.push(t); 
-                    });
+                const text = (n.title + " " + n.content).toLowerCase();
+                // Simple tokenizer for Chinese/English mixed text
+                const tokens = text.split(/[\s,，.。:：!?！？"”'’()（）]+/);
+                
+                // Use a Set to avoid counting same word multiple times for the same note (document frequency logic)
+                const uniqueTokensInNote = new Set();
+                
+                tokens.forEach(t => {
+                    if (t.length > 1 && !stopWords.includes(t) && isNaN(t)) {
+                        uniqueTokensInNote.add(t);
+                    }
+                });
+
+                uniqueTokensInNote.forEach(word => {
+                    if (!keywordMap[word]) keywordMap[word] = [];
+                    keywordMap[word].push(n.id);
+                });
+            });
+
+            // 2. Select Top Keywords by Document Frequency
+            const sortedKeywords = Object.keys(keywordMap).sort((a,b) => keywordMap[b].length - keywordMap[a].length).slice(0, 15); // Top 15 nodes
+            
+            if (sortedKeywords.length === 0) {
+                 container.innerHTML = '<div class="flex items-center justify-center h-full text-slate-400 text-sm">此主題尚無足夠內容進行語義分析</div>';
+                 return;
+            }
+
+            // 3. Build Nodes
+            const nodesData = sortedKeywords.map((w, i) => ({ 
+                id: w, 
+                label: `${w}\n(${keywordMap[w].length})`, 
+                value: keywordMap[w].length, // Size based on frequency
+                color: { background: '#dbeafe', border: '#3b82f6' },
+                font: { size: 14, color: '#1e3a8a' },
+                shape: 'dot'
+            }));
+
+            // 4. Build Edges (Co-occurrence in notes)
+            const edgesData = [];
+            for (let i = 0; i < sortedKeywords.length; i++) {
+                for (let j = i + 1; j < sortedKeywords.length; j++) {
+                    const w1 = sortedKeywords[i];
+                    const w2 = sortedKeywords[j];
+                    
+                    // Find intersection of note IDs (Co-occurrence)
+                    const notes1 = keywordMap[w1];
+                    const notes2 = keywordMap[w2];
+                    const intersection = notes1.filter(id => notes2.includes(id));
+                    
+                    if (intersection.length > 0) {
+                        edgesData.push({
+                            from: w1, 
+                            to: w2, 
+                            value: intersection.length, // Width based on co-occurrence strength
+                            color: { color: '#94a3b8', opacity: 0.4 },
+                            title: `共現於 ${intersection.length} 篇筆記`
+                        });
+                    }
+                }
+            }
+
+            // 5. Render Network
+            const data = { nodes: new vis.DataSet(nodesData), edges: new vis.DataSet(edgesData) };
+            const options = {
+                nodes: { scaling: { min: 10, max: 30 } },
+                edges: { scaling: { min: 1, max: 5 }, smooth: { type: 'continuous' } },
+                physics: { stabilization: false, barnesHut: { gravitationalConstant: -2000, springConstant: 0.04 } },
+                interaction: { hover: true, tooltipDelay: 200 }
+            };
+            
+            conceptNetworkInstance = new vis.Network(container, data, options);
+
+            // 6. Add Click Interaction (The Fix)
+            conceptNetworkInstance.on("click", function (params) {
+                if (params.nodes.length > 0) {
+                    const word = params.nodes[0];
+                    const relatedNoteIds = keywordMap[word];
+                    showKeywordContext(word, relatedNoteIds);
                 }
             });
-            const frequency = {};
-            words.forEach(w => { frequency[w] = (frequency[w] || 0) + 1; });
-            const uniqueWords = Object.keys(frequency).sort((a,b) => frequency[b] - frequency[a]).slice(0, 6);
+        }
+
+        function showKeywordContext(word, noteIds) {
+            const listHtml = noteIds.map(id => {
+                const n = globalAllNotes.find(x => x.id === id);
+                if(!n) return '';
+                // Highlight keyword in content
+                const highlightedContent = n.content.replace(new RegExp(word, 'gi'), `<span class="bg-yellow-200 font-bold px-1 rounded">${word}</span>`);
+                
+                // Get Author Name
+                let authorName = n.author;
+                if (globalRawDB.userList) {
+                    const u = Object.values(globalRawDB.userList).find(u => u.id === n.author);
+                    if (u) authorName = u.name;
+                }
+
+                return `
+                    <div class="p-3 border-b border-slate-100 hover:bg-slate-50 cursor-pointer transition" onclick="viewNote('${n.id}')">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-sm font-bold text-slate-700">${n.title}</span>
+                            <span class="text-xs text-slate-400">${n.date}</span>
+                        </div>
+                        <div class="text-xs text-slate-500 mb-1">By ${authorName}</div>
+                        <div class="text-xs text-slate-600 line-clamp-2">${highlightedContent}</div>
+                    </div>
+                `;
+            }).join('');
+
+            const modalBody = `
+                <div class="mb-4 text-sm text-slate-500">關鍵字 <span class="font-bold text-blue-600 text-lg mx-1">${word}</span> 出現在以下 ${noteIds.length} 篇筆記中：</div>
+                <div class="border border-slate-200 rounded-lg max-h-[400px] overflow-y-auto custom-scrollbar">
+                    ${listHtml}
+                </div>
+            `;
             
-            const nodesData = uniqueWords.map((w, i) => ({ id: i, label: w, color: i%2===0 ? '#3b82f6' : '#93c5fd' }));
-            const edgesData = [];
-            if(nodesData.length > 1) {
-                for(let i=0; i<nodesData.length; i++) for(let j=i+1; j<nodesData.length; j++) edgesData.push({from: i, to: j, color:{color:'#cbd5e1', opacity:0.3}});
-            } else if (nodesData.length === 0) { 
-                nodesData.push({id: 0, label: '尚無關鍵字', color: '#cbd5e1'}); 
-            }
-            new vis.Network(container, { nodes: new vis.DataSet(nodesData), edges: new vis.DataSet(edgesData) }, {}); 
+            // Remove existing if any
+            const existingModal = document.getElementById('keyword-modal');
+            if(existingModal) existingModal.remove();
+
+            // Inject Modal HTML
+            const modalHtml = `
+                <div id="keyword-modal" class="modal-overlay open" onclick="this.remove()">
+                    <div class="modal-content max-w-md" onclick="event.stopPropagation()">
+                        <div class="modal-header bg-blue-50">
+                            <h3 class="text-lg font-bold text-blue-900 flex items-center"><i class="fas fa-search mr-2"></i> 關鍵字上下文分析</h3>
+                            <button onclick="document.getElementById('keyword-modal').remove()" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times text-xl"></i></button>
+                        </div>
+                        <div class="modal-body">
+                            ${modalBody}
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
         }
         
         function initLexicalChart() { 
