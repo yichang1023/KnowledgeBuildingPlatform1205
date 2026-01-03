@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KB 分析中樞 (旗艦學術版) | Teacher Dashboard v20.34 Hotspot-Key-Fix</title>
+    <title>KB 分析中樞 (旗艦學術版) | Teacher Dashboard v20.36 Ref-Error-Fix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
@@ -177,7 +177,7 @@
     <aside class="w-64 bg-slate-900 text-slate-400 flex flex-col shadow-2xl z-20 flex-shrink-0">
         <div class="p-6 border-b border-slate-800">
             <h1 class="text-xl font-bold tracking-wider text-white flex items-center"><i class="fas fa-network-wired mr-2 text-blue-500"></i> KB ANALYTICS</h1>
-            <p class="text-xs text-slate-500 mt-1 ml-6">v20.34 Hotspot-Key-Fix</p>
+            <p class="text-xs text-slate-500 mt-1 ml-6">v20.36 Ref-Error-Fix</p>
         </div>
         
         <!-- Home Link -->
@@ -490,6 +490,26 @@
             'undefined': '一般 (Note)'
         };
 
+        // NEW: Global Lens Interactions Definition (Moved up to fix ReferenceError)
+        const lensInteractions = {
+            'Fact': { title: '事實', text: '描述現象。', color: 'border-l-slate-400 bg-slate-50', example: '...' },
+            'Theory': { title: '理論', text: '個人解釋。', color: 'border-l-blue-500 bg-blue-50', example: '...' },
+            'Challenge': { title: '挑戰', text: '提出反證。', color: 'border-l-yellow-500 bg-yellow-50', example: '...' },
+            'Synthesis': { title: '整合', text: '歸納觀點。', color: 'border-l-green-500 bg-green-50', example: '...' }
+        };
+
+        // NEW: Helper function defined early (Moved up to fix ReferenceError)
+        function generateRealExamplesForLens(nodes) {
+            const findNote = (types) => {
+                const candidates = nodes.filter(n => types.includes(n.type));
+                return candidates.length > 0 ? `「${candidates[Math.floor(Math.random()*candidates.length)].content.substring(0,50)}...」` : "（尚無資料）";
+            };
+            if(lensInteractions['Fact']) lensInteractions['Fact'].example = findNote(['question', 'extend']);
+            if(lensInteractions['Theory']) lensInteractions['Theory'].example = findNote(['improve']);
+            if(lensInteractions['Challenge']) lensInteractions['Challenge'].example = findNote(['counter']);
+            if(lensInteractions['Synthesis']) lensInteractions['Synthesis'].example = findNote(['riseabove']);
+        }
+
         // --- 1. 資料庫連接核心 (Core Data Logic) ---
         function getRealData() {
             const raw = localStorage.getItem(STORAGE_KEY);
@@ -509,10 +529,10 @@
             }
             populateTopicSelectors(topics);
 
-            // 根據過濾器篩選貼文
+            // 根據過濾器篩選貼文 - CRITICAL FIX: Use Loose String Comparison for Topic ID
             const filteredNodes = activeTopicFilter === 'all' 
                 ? nodes 
-                : nodes.filter(n => n.topicId === activeTopicFilter);
+                : nodes.filter(n => String(n.topicId) === String(activeTopicFilter));
 
             globalAllNotes = filteredNodes.map(n => ({
                 id: n.id,
@@ -1074,6 +1094,7 @@
                 <div class="absolute top-4 left-2 text-xs font-bold text-slate-400 rotate-90 origin-left">← 認知落差</div>
                 <div class="absolute top-1/2 left-0 right-0 h-px bg-slate-300 border-t border-dashed"></div>
                 <div class="absolute left-1/2 top-0 bottom-0 w-px bg-slate-300 border-l border-dashed"></div>
+                <div class="absolute top-2 right-2 text-[10px] text-slate-300 bg-slate-100 px-1 rounded">Count: ${globalAllNotes.length}</div>
             `;
             
             if (globalAllNotes.length === 0) {
@@ -1081,25 +1102,28 @@
                 return;
             }
 
-            // FIXED: Increased limit from 15 to 50 to show more hotspots for a topic
-            globalAllNotes.slice(0, 50).forEach((n, i) => {
+            // CRITICAL FIX: Removed .slice(0, 50) completely. Shows ALL items for the current topic filter.
+            // If activeTopicFilter is specific, this shows everything for that topic.
+            // If activeTopicFilter is 'all', it shows everything (might be crowded but correct).
+            globalAllNotes.forEach((n, i) => {
                 let y = 50;
                 if(n.type === 'question') y = 80;
                 else if (n.type === 'improve') y = 60;
                 else if (n.type === 'riseabove') y = 70;
                 else y = 30;
+                // Minor random jitter to prevent perfect overlap
                 y += (Math.random() * 20 - 10);
                 let x = Math.random() * 80 + 10;
 
                 const dot = document.createElement('div');
-                dot.className = 'absolute cursor-pointer group hover:scale-125 transition-transform';
+                dot.className = 'absolute cursor-pointer group hover:scale-125 transition-transform z-10'; // Added z-10
                 dot.style.left = `${x}%`;
                 dot.style.bottom = `${y}%`;
                 dot.onclick = () => viewNote(n.id); // Add interaction
                 dot.innerHTML = `
                     <div class="w-3 h-3 ${n.type === 'question' ? 'bg-red-500' : 'bg-blue-500'} rounded-full shadow-lg hotspot-dot"></div>
-                    <div class="absolute -top-8 -left-10 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap z-10 pointer-events-none w-max max-w-[150px] truncate p-1">
-                        ${n.title} (點擊查看)
+                    <div class="absolute -top-8 -left-10 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap z-20 pointer-events-none w-max max-w-[150px] truncate p-1 shadow-xl border border-slate-700">
+                        ${n.title}
                     </div>
                 `;
                 container.appendChild(dot);
@@ -1604,23 +1628,6 @@
             }
         };
 
-        const lensInteractions = {
-            'Fact': { title: '事實', text: '描述現象。', color: 'border-l-slate-400 bg-slate-50', example: '...' },
-            'Theory': { title: '理論', text: '個人解釋。', color: 'border-l-blue-500 bg-blue-50', example: '...' },
-            'Challenge': { title: '挑戰', text: '提出反證。', color: 'border-l-yellow-500 bg-yellow-50', example: '...' },
-            'Synthesis': { title: '整合', text: '歸納觀點。', color: 'border-l-green-500 bg-green-50', example: '...' }
-        };
-        function generateRealExamplesForLens(nodes) {
-            const findNote = (types) => {
-                const candidates = nodes.filter(n => types.includes(n.type));
-                return candidates.length > 0 ? `「${candidates[Math.floor(Math.random()*candidates.length)].content.substring(0,50)}...」` : "（尚無資料）";
-            };
-            lensInteractions['Fact'].example = findNote(['question', 'extend']);
-            lensInteractions['Theory'].example = findNote(['improve']);
-            lensInteractions['Challenge'].example = findNote(['counter']);
-            lensInteractions['Synthesis'].example = findNote(['riseabove']);
-        }
-        
         // --- NEW HELPER FUNCTION FOR DETAILED ANALYSIS ---
         function generateDetailedStatusAnalysis(key, stats) {
             let html = "";
@@ -1842,8 +1849,8 @@
                 btn.disabled = false;
                 
                 // Critical Fix: Clear bad keys so user can try again
-                // localStorage.removeItem('kb_ai_key');
-                // localStorage.removeItem('gemini_api_key');
+                localStorage.removeItem('kb_ai_key');
+                localStorage.removeItem('gemini_api_key');
             }
         }
 
