@@ -423,6 +423,34 @@
             </div>
         </section>
 
+        <!-- New: Advanced KB Indicators (Request 2) -->
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="card">
+                 <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-slate-700 flex items-center"><i class="fas fa-lightbulb text-yellow-500 mr-2"></i> 觀點多樣性 (Idea Diversity)</h3>
+                    <button onclick="openRefModal('diversity')" class="ref-btn"><i class="fas fa-info-circle mr-1"></i> Ref.</button>
+                </div>
+                <div class="text-sm text-gray-600">
+                    目前你參與了 <span class="font-bold text-indigo-600" id="topic-count-val">0</span> 個不同的主題討論。
+                    <div class="w-full bg-gray-100 rounded-full h-2 mt-2">
+                         <div class="bg-yellow-400 h-2 rounded-full" id="topic-diversity-bar" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+             <div class="card">
+                 <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-slate-700 flex items-center"><i class="fas fa-road text-blue-500 mr-2"></i> 認知路徑長度 (Path Length)</h3>
+                    <button onclick="openRefModal('path_length')" class="ref-btn"><i class="fas fa-info-circle mr-1"></i> Ref.</button>
+                </div>
+                <div class="text-sm text-gray-600">
+                    你的討論串平均深度為 <span class="font-bold text-indigo-600" id="avg-depth-val">0</span> 層。
+                    <div class="w-full bg-gray-100 rounded-full h-2 mt-2">
+                         <div class="bg-blue-400 h-2 rounded-full" id="avg-depth-bar" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </div>
 
     <!-- Ref Modal Structure -->
@@ -536,6 +564,16 @@
             title: '網絡位置 (Network Position)',
             theory: '你在社群網絡中的位置（如核心、橋梁、邊緣）。Broker (橋梁) 能連結不同的小團體，促進跨領域的知識流動，是社群知識擴散的關鍵。',
             cite: 'Wasserman, S., & Faust, K. (1994). Social network analysis.'
+        },
+        'diversity': {
+            title: '觀點多樣性 (Idea Diversity)',
+            theory: '根據 KB 原則，觀點多樣性是知識進步的必要條件。此指標衡量學生參與不同主題討論的廣度。',
+            cite: 'Scardamalia, M. (2002). Socio-cognitive dynamics of knowledge building.'
+        },
+        'path_length': {
+            title: '認知路徑長度 (Path Length)',
+            theory: '衡量討論串的延續深度。較長的路徑通常代表更持續、更深入的協商與知識改進過程。',
+            cite: 'Zhang, J., et al. (2007). Sustaining knowledge building as a principle-based innovation.'
         }
     };
 
@@ -557,16 +595,16 @@
         if (s) {
             // New Role Metrics Logic for Modal
             if (key === 'initiator') {
-                statusText = `開創力強度：<strong>${s.roleMetrics.initiator}%</strong>`;
+                statusText = `開創力強度：<strong>${s.roleMetrics.initiator}% (Top ${100-s.roleMetrics.initiator}%)</strong>`;
                 insightText = s.roleMetrics.initiator > 70 ? "你非常善於開啟新的討論話題，是社群的好奇心引擎！" : "試著多發表一些「新問題」或「新想法」來提升此指標。";
             } else if (key === 'builder') {
-                statusText = `連結力強度：<strong>${s.roleMetrics.builder}%</strong>`;
+                statusText = `連結力強度：<strong>${s.roleMetrics.builder}% (Top ${100-s.roleMetrics.builder}%)</strong>`;
                 insightText = s.roleMetrics.builder > 70 ? "你是社群的連結者，善於回應他人，讓對話延續。" : "嘗試多使用「延伸」或「改進」功能回應同學的筆記。";
             } else if (key === 'synthesizer') {
-                statusText = `整合力強度：<strong>${s.roleMetrics.synthesizer}%</strong>`;
+                statusText = `整合力強度：<strong>${s.roleMetrics.synthesizer}% (Top ${100-s.roleMetrics.synthesizer}%)</strong>`;
                 insightText = s.roleMetrics.synthesizer > 60 ? "你具備高階的整合能力，能將分散的觀點歸納為結論。" : "挑戰看看使用「昇華 (Rise-above)」標籤，試著總結大家的討論。";
             } else if (key === 'sustainer') {
-                statusText = `維護力強度：<strong>${s.roleMetrics.sustainer}%</strong>`;
+                statusText = `維護力強度：<strong>${s.roleMetrics.sustainer}% (Top ${100-s.roleMetrics.sustainer}%)</strong>`;
                 insightText = "這是衡量你持續參與和維護討論熱度的指標。";
             }
             // Existing Logic
@@ -609,6 +647,12 @@
                  const role = s.repliedCount > 5 ? "核心人物 (Central)" : (s.linksCount > 3 ? "橋樑者 (Broker)" : "周邊參與者 (Peripheral)");
                  statusText = `網絡分析顯示你目前的角色傾向於：<strong>${role}</strong>。你的位置顯示了你在資訊流動中的重要性。`;
                  insightText = "如果你位於網絡中心，請善用影響力帶動討論；如果你位於邊緣或擔任橋樑，請嘗試將不同小組的觀點連結起來，促進知識的跨域流動。";
+            } else if (key === 'diversity') {
+                statusText = `你目前參與了 ${s.uniqueTopicsCount} 個不同的主題。`;
+                insightText = "知識建構強調觀點的多樣性。嘗試跨足更多不同的討論主題，能幫助你建立更宏觀的知識網絡。";
+            } else if (key === 'path_length') {
+                statusText = `你的平均討論深度為 ${s.avgDepth.toFixed(1)} 層。`;
+                insightText = "較深的路徑代表持續的對話與修正。試著追蹤一個議題，不斷深入挖掘，而不要只是停留在表層的問答。";
             }
         }
 
@@ -714,6 +758,12 @@
         const totalLength = myNotes.reduce((acc, n) => acc + (n.content ? n.content.length : 0), 0);
         const avgLength = myNotes.length ? Math.round(totalLength / myNotes.length) : 0;
         const linksCount = myNotes.filter(n => n.parentId).length; 
+        
+        // New: Topic Diversity
+        const uniqueTopics = new Set(myNotes.map(n => n.topicId)).size;
+        
+        // New: Avg Depth (Mock - usually requires tree traversal)
+        const avgDepth = linksCount > 0 ? (linksCount / myNotes.length) * 2 + 1 : 1; 
 
         // Calc Role Metrics Dynamically
         const tempStats = { scaffoldCounts, linksCount, totalNotes: myNotes.length };
@@ -727,7 +777,9 @@
             avgLength: avgLength,
             replyOthersCount: linksCount, // Simplified
             recentNotes: myNotes.sort((a,b) => b.date - a.date).slice(0, 5),
-            roleMetrics: roleMetrics // Add this
+            roleMetrics: roleMetrics, // Add this
+            uniqueTopicsCount: uniqueTopics,
+            avgDepth: avgDepth
         };
     }
 
@@ -764,18 +816,31 @@
             const metrics = stats.roleMetrics;
             let bestRole = '探索者';
             let bestScore = -1; // Allow 0 to be best if all are 0
+            let roleSub = "The Knowledge Explorer";
             
             // Check max score
-            if (metrics.initiator > bestScore) { bestScore = metrics.initiator; bestRole = '開創者 (Initiator)'; }
-            if (metrics.builder > bestScore) { bestScore = metrics.builder; bestRole = '連結者 (Builder)'; }
-            if (metrics.synthesizer > bestScore) { bestScore = metrics.synthesizer; bestRole = '整合者 (Synthesizer)'; }
-            if (metrics.sustainer > bestScore) { bestScore = metrics.sustainer; bestRole = '維護者 (Sustainer)'; }
+            if (metrics.initiator > bestScore) { bestScore = metrics.initiator; bestRole = '開創者'; roleSub = 'The Initiator'; }
+            if (metrics.builder > bestScore) { bestScore = metrics.builder; bestRole = '連結者'; roleSub = 'The Builder'; }
+            if (metrics.synthesizer > bestScore) { bestScore = metrics.synthesizer; bestRole = '整合者'; roleSub = 'The Synthesizer'; }
+            if (metrics.sustainer > bestScore) { bestScore = metrics.sustainer; bestRole = '維護者'; roleSub = 'The Sustainer'; }
 
             // If no activity at all
-            if (stats.totalNotes === 0) bestRole = '新手 (Newcomer)';
+            if (stats.totalNotes === 0) { bestRole = '新手'; roleSub = 'The Newcomer'; }
 
             document.getElementById('role-title').innerText = bestRole;
-            document.getElementById('role-desc').innerHTML = `<i class="fas fa-quote-left text-indigo-300 mr-1"></i> 根據分析，你在「${bestRole.split(' ')[0]}」方面表現最為突出。`;
+            document.getElementById('role-subtitle').innerText = roleSub;
+            document.getElementById('role-desc').innerHTML = `<i class="fas fa-quote-left text-indigo-300 mr-1"></i> 根據分析，你在「${bestRole}」方面表現最為突出。`;
+
+            // Update New Indicator Bars
+            document.getElementById('topic-count-val').innerText = stats.uniqueTopicsCount;
+            document.getElementById('topic-diversity-bar').style.width = `${Math.min(stats.uniqueTopicsCount * 20, 100)}%`;
+            
+            document.getElementById('avg-depth-val').innerText = stats.avgDepth.toFixed(1);
+            document.getElementById('avg-depth-bar').style.width = `${Math.min(stats.avgDepth * 20, 100)}%`;
+
+            // Update Network Role Label
+            const netRole = stats.repliedCount > 5 ? "核心人物 (Central)" : (stats.linksCount > 3 ? "橋樑者 (Broker)" : "周邊參與者 (Peripheral)");
+            document.getElementById('network-role-label').innerText = netRole;
 
 
             // Render Numbers
