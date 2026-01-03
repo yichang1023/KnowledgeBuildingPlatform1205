@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KB 分析中樞 (旗艦學術版) | Teacher Dashboard v20.32 Concept-Link-Upgrade</title>
+    <title>KB 分析中樞 (旗艦學術版) | Teacher Dashboard v20.33 Evolution-Fix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
@@ -177,7 +177,7 @@
     <aside class="w-64 bg-slate-900 text-slate-400 flex flex-col shadow-2xl z-20 flex-shrink-0">
         <div class="p-6 border-b border-slate-800">
             <h1 class="text-xl font-bold tracking-wider text-white flex items-center"><i class="fas fa-network-wired mr-2 text-blue-500"></i> KB ANALYTICS</h1>
-            <p class="text-xs text-slate-500 mt-1 ml-6">v20.32 Concept-Link-Upgrade</p>
+            <p class="text-xs text-slate-500 mt-1 ml-6">v20.33 Evolution-Fix</p>
         </div>
         
         <!-- Home Link -->
@@ -479,6 +479,16 @@
         let globalRawDB = {};
         let currentModalTopic = ''; 
         let activeTopicFilter = 'all';
+
+        // NEW: KB Type Mapping Helper
+        const kbTypeMap = {
+            'question': '提問 (Question)',
+            'extend': '延伸 (Build-on)',
+            'improve': '改進 (Improve)',
+            'riseabove': '昇華 (Rise-above)',
+            'counter': '不同觀點 (Alternative)',
+            'undefined': '一般 (Note)'
+        };
 
         // --- 1. 資料庫連接核心 (Core Data Logic) ---
         function getRealData() {
@@ -1095,7 +1105,7 @@
             });
         }
 
-        // NEW: Dynamic Evolution Timeline with Click Interaction
+        // NEW: Dynamic Evolution Timeline with Click Interaction and KB Labels (FIXED)
         function initEvolutionTimeline() {
             const container = document.getElementById('evolution-timeline-container');
             container.innerHTML = '<div class="timeline-line"></div>';
@@ -1124,14 +1134,20 @@
                 else if(n.type === 'riseabove') { icon = 'fa-layer-group'; color = 'bg-purple-50 border-purple-200'; }
                 else if(n.type === 'improve') { icon = 'fa-arrow-up'; color = 'bg-green-50 border-green-200'; }
 
+                // FIX: Get Proper KB Label
+                const typeLabel = kbTypeMap[n.type] || '一般 (Note)';
+
                 item.innerHTML = `
                     <div class="absolute -left-10 top-0 w-8 h-8 bg-white rounded-full flex items-center justify-center border-2 border-slate-200 text-slate-400 text-xs">
                         <i class="fas ${icon}"></i>
                     </div>
                     <div class="${color} border p-3 rounded-lg shadow-sm">
                         <div class="flex justify-between items-center mb-1">
-                            <span class="text-xs font-bold text-slate-700">${n.title}</span>
+                            <span class="text-xs font-bold text-slate-700">${n.title || '無標題'}</span>
                             <span class="text-[10px] text-slate-400">${n.date}</span>
+                        </div>
+                        <div class="mb-1">
+                            <span class="text-[10px] bg-slate-100 text-slate-600 px-1 py-0.5 rounded border border-slate-300 font-medium">${typeLabel}</span>
                         </div>
                         <div class="text-xs text-slate-600 line-clamp-2">${n.content}</div>
                     </div>
@@ -1148,7 +1164,8 @@
             document.getElementById('nd-title').innerText = n.title;
             document.getElementById('nd-content').innerText = n.content;
             document.getElementById('nd-date').innerText = n.date;
-            document.getElementById('nd-type').innerText = n.type;
+            // FIX: Use KB Label instead of raw type
+            document.getElementById('nd-type').innerText = kbTypeMap[n.type] || n.type;
             
             // Resolve author name
             let authorName = n.author;
@@ -1250,13 +1267,13 @@
             // Clear previous results/errors
             resDiv.innerHTML = '';
             
-            // MODIFIED: Check for 'kb_ai_key' first, then 'gemini_api_key' for backward compatibility
+            // MODIFIED: Robust Key Check. Try to get key silently first.
             let apiKey = localStorage.getItem('kb_ai_key') || localStorage.getItem('gemini_api_key');
             
             if (!apiKey) { 
                 apiKey = prompt("請輸入 Gemini API Key："); 
                 if (apiKey) {
-                    localStorage.setItem('kb_ai_key', apiKey); // Save to the new standard key
+                    localStorage.setItem('kb_ai_key', apiKey); 
                 } else {
                     return; // User cancelled
                 }
@@ -1291,9 +1308,8 @@
                 console.error("Topic Summary AI Error:", e);
                 resDiv.innerHTML = `<div class="text-red-600 font-bold mb-2">生成失敗</div><div class="text-xs text-red-500">${e.message}</div>`;
                 
-                // Clear bad keys to force re-entry
-                localStorage.removeItem('kb_ai_key');
-                localStorage.removeItem('gemini_api_key');
+                // Only clear key if it's likely an auth error (400/403), but here just don't auto-delete to annoy user
+                // localStorage.removeItem('kb_ai_key'); 
                 btn.disabled = false;
             }
         }
@@ -1778,7 +1794,7 @@
             // Clear previous results/errors
             res.innerHTML = '';
             
-            // MODIFIED: Check for 'kb_ai_key' first, then 'gemini_api_key' for backward compatibility
+            // MODIFIED: Robust Key Check. Try to get key silently first.
             let apiKey = localStorage.getItem('kb_ai_key') || localStorage.getItem('gemini_api_key');
             
             if (!apiKey) { 
