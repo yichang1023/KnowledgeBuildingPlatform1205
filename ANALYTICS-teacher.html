@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KB 分析中樞 (旗艦學術版) | Teacher Dashboard v20.41 Individual-Deep-Dive</title>
+    <title>KB 分析中樞 (旗艦學術版) | Teacher Dashboard v20.44 Stable-Broker</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
@@ -136,6 +136,13 @@
         }
         .keyword-tag:hover { background: #c7d2fe; }
 
+        /* Sequential Matrix Style */
+        .seq-table { width: 100%; font-size: 0.8rem; border-collapse: collapse; text-align: center; }
+        .seq-table th { font-weight: bold; color: #475569; padding: 4px; border-bottom: 2px solid #e2e8f0; }
+        .seq-table td { padding: 6px; border: 1px solid #f1f5f9; }
+        .seq-cell { border-radius: 4px; display: inline-block; width: 100%; height: 100%; min-height: 20px; display: flex; align-items: center; justify-content: center; }
+        .seq-header-row th:first-child { text-align: right; padding-right: 8px; color: #64748b; font-style: italic; }
+
         /* Mobile specific adjustments */
         .mobile-header {
             display: none;
@@ -211,7 +218,7 @@
     <aside id="sidebar" class="w-64 bg-slate-900 text-slate-400 flex flex-col shadow-2xl flex-shrink-0 md:relative absolute top-0 bottom-0 left-0">
         <div class="p-6 border-b border-slate-800 hidden md:block">
             <h1 class="text-xl font-bold tracking-wider text-white flex items-center"><i class="fas fa-network-wired mr-2 text-blue-500"></i> KB ANALYTICS</h1>
-            <p class="text-xs text-slate-500 mt-1 ml-6">v20.41 Individual-Deep-Dive</p>
+            <p class="text-xs text-slate-500 mt-1 ml-6">v20.44 Stable-Broker</p>
         </div>
         
         <!-- Mobile Header inside sidebar to close -->
@@ -280,6 +287,7 @@
                 </div>
             </div>
 
+            <!-- Standard Metrics Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 <div class="card border-l-4 border-green-500">
                     <div class="flex justify-between items-start"><div><div class="text-xs text-slate-500 font-bold uppercase">總發文數 (Total Notes)</div><div class="text-3xl font-bold text-slate-800 mt-1" id="total-notes-count">0</div></div><i class="fas fa-file-alt text-green-200 text-3xl"></i></div>
@@ -302,7 +310,72 @@
                     <div class="mt-auto text-right pt-2"><button class="ref-btn" onclick="openRef('risk')"><i class="fas fa-book"></i> Ref:</button></div>
                 </div>
             </div>
-            <!-- Expanded Grid for Overview -->
+
+            <!-- KB Academic Advanced Indicators (Gini, Thread Depth, Trajectory) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                <div class="card bg-slate-50 border border-slate-200">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="text-xs text-slate-500 font-bold uppercase">參與平等性 (Gini)</div>
+                        <button class="ref-btn px-1 py-0 h-5 text-[10px]" onclick="openRef('gini')"><i class="fas fa-book"></i> Ref</button>
+                    </div>
+                    <div class="text-2xl font-bold text-slate-700" id="gini-coefficient">0.00</div>
+                    <div class="text-[10px] text-slate-400 mt-1">越接近 0 越平等 (理想 < 0.4)</div>
+                </div>
+                <div class="card bg-slate-50 border border-slate-200">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="text-xs text-slate-500 font-bold uppercase">平均對話深度 (Thread Depth)</div>
+                        <button class="ref-btn px-1 py-0 h-5 text-[10px]" onclick="openRef('thread_depth')"><i class="fas fa-book"></i> Ref</button>
+                    </div>
+                    <div class="text-2xl font-bold text-slate-700" id="avg-thread-depth">0.0</div>
+                    <div class="text-[10px] text-slate-400 mt-1">Sustained Inquiry (理想 > 3.0)</div>
+                </div>
+                <div class="col-span-1 md:col-span-2 card bg-slate-50 border border-slate-200">
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="text-xs text-slate-500 font-bold uppercase">知識推進軌跡 (Trajectory)</div>
+                        <button class="ref-btn px-1 py-0 h-5 text-[10px]" onclick="openRef('kb_trajectory')"><i class="fas fa-book"></i> Ref</button>
+                    </div>
+                    <div class="h-20 w-full relative">
+                        <canvas id="overviewTrajectoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NEW: Advanced Structural Analysis Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+                <!-- 1. Lag-Sequential Analysis -->
+                <div class="card">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="font-bold text-slate-800"><i class="fas fa-random text-indigo-500 mr-2"></i>言談序列轉移分析 (Sequential Analysis)</h3>
+                            <p class="text-xs text-slate-500">對話基因圖譜：分析「某類型發言」後通常接續「哪種回應」？</p>
+                        </div>
+                        <button class="ref-btn" onclick="openRef('lag_sequence')"><i class="fas fa-book"></i> Ref:</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <div id="sequential-matrix-container" class="min-w-[300px]">
+                            <!-- Matrix injected by JS -->
+                        </div>
+                    </div>
+                    <div class="mt-2 text-xs text-slate-400 italic text-right">* 數值代表轉移機率 (%)，顏色越深機率越高。參考 Jeong (2003)。</div>
+                </div>
+
+                <!-- 2. Knowledge Brokers -->
+                <div class="card">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="font-bold text-slate-800"><i class="fas fa-users-cog text-teal-500 mr-2"></i>關鍵知識經紀人 (Knowledge Brokers)</h3>
+                            <p class="text-xs text-slate-500">中介中心性 (Betweenness Centrality) 分析：誰是連結不同群體的橋樑？</p>
+                        </div>
+                        <button class="ref-btn" onclick="openRef('brokers')"><i class="fas fa-book"></i> Ref:</button>
+                    </div>
+                    <div id="brokers-list-container" class="space-y-3">
+                        <!-- Brokers list injected by JS -->
+                        <div class="text-center text-slate-400 text-sm py-4">分析中...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Existing Expanded Grid for Overview -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
                 <div class="lg:col-span-2 card">
                     <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-slate-800"><i class="fas fa-share-alt text-blue-500 mr-2"></i>社群互動結構 (SNA)</h3><button class="ref-btn" onclick="openRef('sna')"><i class="fas fa-book"></i> Ref:</button></div>
@@ -313,7 +386,7 @@
                         <div class="flex justify-between items-center mb-2"><h3 class="font-bold text-slate-800 text-sm"><i class="fas fa-compass text-indigo-500 mr-2"></i>鷹架分佈</h3><button class="ref-btn" onclick="openRef('principles')"><i class="fas fa-book"></i> Ref:</button></div>
                         <div class="h-[150px]"><canvas id="principlesChart"></canvas></div>
                     </div>
-                    <!-- NEW: KB 12 Principles Radar -->
+                    <!-- KB 12 Principles Radar -->
                     <div class="border-t pt-4">
                         <div class="flex justify-between items-center mb-2"><h3 class="font-bold text-slate-800 text-sm"><i class="fas fa-star text-yellow-500 mr-2"></i>KB 12原則</h3><button class="ref-btn" onclick="openRef('kb12')"><i class="fas fa-book"></i> Ref:</button></div>
                         <div class="h-[180px]"><canvas id="kbPrinciplesChart"></canvas></div>
@@ -688,6 +761,8 @@
         }
 
         // --- 2. 班級總體計算 (Class Overview) ---
+        let overviewTrajectoryChart; // Declare here
+
         function calculateClassOverview(db) {
             const nodes = db.nodes || [];
             globalRawDB = db;
@@ -730,16 +805,320 @@
             
             // 風險學生計算
             let riskCount = 0;
+            const userCounts = {};
             students.forEach(u => {
                 const count = filteredNodes.filter(n => n.author === u.id).length;
                 if (count < 2) riskCount++;
+                userCounts[u.id] = count;
             });
 
-            globalClassStats = { totalNotes, density, raRate, riskCount, studentCount: students.length };
+            // NEW ACADEMIC METRICS CALCULATION
+            
+            // 1. Gini Coefficient
+            const countsArray = Object.values(userCounts).sort((a,b) => a-b);
+            const gini = calculateGini(countsArray);
+            
+            // 2. Avg Thread Depth
+            const threadDepth = calculateAvgThreadDepth(filteredNodes);
+
+            globalClassStats = { 
+                totalNotes, density, raRate, riskCount, 
+                studentCount: students.length,
+                gini: gini.toFixed(2),
+                threadDepth: threadDepth.toFixed(1)
+            };
+            
+            // UI Updates
+            if(document.getElementById('gini-coefficient')) {
+                document.getElementById('gini-coefficient').innerText = globalClassStats.gini;
+                // Color coding for Gini
+                document.getElementById('gini-coefficient').className = `text-2xl font-bold ${gini > 0.6 ? 'text-red-500' : (gini > 0.4 ? 'text-yellow-600' : 'text-green-600')}`;
+            }
+            if(document.getElementById('avg-thread-depth')) {
+                document.getElementById('avg-thread-depth').innerText = globalClassStats.threadDepth;
+            }
+
             generateRealExamplesForLens(filteredNodes);
-            renderStaticDiagnosis(globalClassStats); // Dashboard Insight
+            renderStaticDiagnosis(globalClassStats); 
+            renderOverviewTrajectory(filteredNodes);
+            renderSequentialMatrix(filteredNodes); // NEW
+            renderKnowledgeBrokers(filteredNodes, students); // NEW
 
             return { totalNotes, density, raRate, riskCount, nodes: filteredNodes, students };
+        }
+
+        // Helper: Gini Coefficient
+        function calculateGini(arr) {
+            if (arr.length === 0) return 0;
+            const n = arr.length;
+            const mean = arr.reduce((a,b)=>a+b,0) / n;
+            if (mean === 0) return 0;
+            let sumDiffs = 0;
+            for(let i=0; i<n; i++) {
+                for(let j=0; j<n; j++) {
+                    sumDiffs += Math.abs(arr[i] - arr[j]);
+                }
+            }
+            return sumDiffs / (2 * n * n * mean);
+        }
+
+        // Helper: Average Thread Depth
+        function calculateAvgThreadDepth(nodes) {
+            if(nodes.length === 0) return 0;
+            // Build adjacency list
+            const childrenMap = {};
+            const roots = [];
+            nodes.forEach(n => {
+                if(n.parentId) {
+                    if(!childrenMap[n.parentId]) childrenMap[n.parentId] = [];
+                    childrenMap[n.parentId].push(n.id);
+                } else {
+                    roots.push(n.id);
+                }
+            });
+
+            // DFS for max depth of each tree
+            let totalDepth = 0;
+            let pathCount = 0; // Count of leaf nodes basically
+
+            function getDepths(id, currentDepth) {
+                const children = childrenMap[id] || [];
+                if(children.length === 0) {
+                    totalDepth += currentDepth;
+                    pathCount++;
+                    return;
+                }
+                children.forEach(c => getDepths(c, currentDepth + 1));
+            }
+
+            if(roots.length === 0 && nodes.length > 0) return 1; // All disconnected or circular edge case fallback
+
+            roots.forEach(r => getDepths(r, 1));
+            
+            return pathCount > 0 ? totalDepth / pathCount : 0;
+        }
+
+        // New Chart: Overview Trajectory
+        function renderOverviewTrajectory(nodes) {
+            const ctx = document.getElementById('overviewTrajectoryChart').getContext('2d');
+            if(overviewTrajectoryChart) overviewTrajectoryChart.destroy();
+
+            // Sort nodes by time
+            const sorted = [...nodes].sort((a,b) => a.dateTime - b.dateTime);
+            if(sorted.length === 0) return;
+
+            // Generate cumulative data
+            const labels = [];
+            const dataQ = []; // Questions
+            const dataI = []; // Ideas (Improve + Riseabove)
+            
+            let cumQ = 0;
+            let cumI = 0;
+            
+            // Group by day or simple index step to avoid too many points
+            sorted.forEach((n, idx) => {
+                if (n.type === 'question') cumQ++;
+                if (n.type === 'improve' || n.type === 'riseabove') cumI++;
+                
+                // Add point every 10% or at least last one
+                if (idx % Math.ceil(sorted.length / 20) === 0 || idx === sorted.length - 1) {
+                    labels.push(n.date);
+                    dataQ.push(cumQ);
+                    dataI.push(cumI);
+                }
+            });
+
+            overviewTrajectoryChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: '提出的問題 (Questions)', data: dataQ, borderColor: '#3b82f6', tension: 0.4, pointRadius: 0 },
+                        { label: '發展的理論 (Theories)', data: dataI, borderColor: '#a855f7', tension: 0.4, pointRadius: 0 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { 
+                        x: { display: false }, 
+                        y: { display: false } 
+                    },
+                    elements: { point: { radius: 0 } }
+                }
+            });
+        }
+
+        // NEW: Sequential Matrix Render
+        function renderSequentialMatrix(nodes) {
+            const container = document.getElementById('sequential-matrix-container');
+            const types = ['question', 'extend', 'improve', 'riseabove'];
+            const labels = {'question':'提問', 'extend':'延伸', 'improve':'改進', 'riseabove':'整合'};
+            const matrix = {};
+            
+            // Initialize
+            types.forEach(t1 => {
+                matrix[t1] = {};
+                types.forEach(t2 => matrix[t1][t2] = 0);
+            });
+
+            // Count transitions
+            let totalTransitions = 0;
+            nodes.forEach(n => {
+                if(n.parentId) {
+                    const parent = nodes.find(p => p.id === n.parentId);
+                    if(parent) {
+                        let t1 = parent.type;
+                        let t2 = n.type;
+                        if(t1 === 'counter') t1 = 'improve';
+                        if(t2 === 'counter') t2 = 'improve';
+                        
+                        if(matrix[t1] && matrix[t1][t2] !== undefined) {
+                            matrix[t1][t2]++;
+                            totalTransitions++;
+                        }
+                    }
+                }
+            });
+
+            // Render HTML Table
+            let html = `<table class="seq-table">
+                <tr class="seq-header-row">
+                    <th>From \\ To</th>
+                    ${types.map(t => `<th class="text-xs">${labels[t]}</th>`).join('')}
+                </tr>`;
+            
+            types.forEach(rowType => {
+                html += `<tr><th class="text-xs">${labels[rowType]}</th>`;
+                types.forEach(colType => {
+                    const count = matrix[rowType][colType];
+                    const rowTotal = types.reduce((acc, t) => acc + matrix[rowType][t], 0);
+                    const pct = rowTotal > 0 ? Math.round((count / rowTotal) * 100) : 0;
+                    
+                    // Heatmap color logic (White to Blue)
+                    let bg = '#ffffff';
+                    let text = '#64748b';
+                    if(pct > 0) {
+                        bg = `rgba(59, 130, 246, ${pct/100 * 0.8 + 0.1})`; // Blue scale
+                        if(pct > 50) text = 'white';
+                        else text = '#1e3a8a';
+                    }
+                    
+                    html += `<td><div class="seq-cell" style="background-color:${bg}; color:${text}">${pct}%</div></td>`;
+                });
+                html += `</tr>`;
+            });
+            html += `</table>`;
+            container.innerHTML = html;
+        }
+
+        // NEW: Knowledge Brokers (STABLE Brandes Algorithm)
+        function renderKnowledgeBrokers(nodes, students) {
+            // 1. Build adjacency list (Undirected for social connection)
+            const adj = {};
+            const studentIds = students.map(s => s.id);
+            studentIds.forEach(id => adj[id] = []); // Use array for neighbors
+            
+            nodes.forEach(n => {
+                if(n.parentId) {
+                    const p = nodes.find(x => x.id === n.parentId);
+                    if(p && p.author !== n.author) {
+                        // Avoid duplicates if possible, though Set handles it better, here we use Array for simple traversal
+                        if(adj[n.author] && !adj[n.author].includes(p.author)) adj[n.author].push(p.author);
+                        if(adj[p.author] && !adj[p.author].includes(n.author)) adj[p.author].push(n.author);
+                    }
+                }
+            });
+
+            // 2. Brandes Algorithm for Betweenness Centrality
+            const CB = {};
+            studentIds.forEach(id => CB[id] = 0);
+
+            studentIds.forEach(s => {
+                const S = []; // Stack
+                const P = {}; // Predecessors
+                const sigma = {}; // Number of shortest paths
+                const d = {}; // Distance
+                
+                studentIds.forEach(v => {
+                    P[v] = [];
+                    sigma[v] = 0;
+                    d[v] = -1;
+                });
+                
+                sigma[s] = 1;
+                d[s] = 0;
+                
+                const Q = [s]; // Queue
+                
+                while (Q.length > 0) {
+                    const v = Q.shift();
+                    S.push(v);
+                    
+                    if (adj[v]) {
+                        adj[v].forEach(w => {
+                            // Path discovery
+                            if (d[w] < 0) {
+                                Q.push(w);
+                                d[w] = d[v] + 1;
+                            }
+                            // Path counting
+                            if (d[w] === d[v] + 1) {
+                                sigma[w] += sigma[v];
+                                P[w].push(v);
+                            }
+                        });
+                    }
+                }
+                
+                const delta = {};
+                studentIds.forEach(v => delta[v] = 0);
+                
+                // S returns vertices in order of non-increasing distance from s
+                while (S.length > 0) {
+                    const w = S.pop();
+                    P[w].forEach(v => {
+                        delta[v] += (sigma[v] / sigma[w]) * (1 + delta[w]);
+                    });
+                    if (w !== s) {
+                        CB[w] += delta[w];
+                    }
+                }
+            });
+
+            // Normalize (optional for display, raw score is fine for ranking)
+            // For undirected graph, divide by 2
+            studentIds.forEach(id => CB[id] = CB[id] / 2);
+
+            const sortedBrokers = Object.entries(CB)
+                .sort((a,b) => b[1] - a[1])
+                .slice(0, 3);
+
+            const container = document.getElementById('brokers-list-container');
+            
+            // Check if any score > 0
+            if(sortedBrokers.length === 0 || sortedBrokers[0][1] === 0) {
+                container.innerHTML = '<div class="text-center text-slate-400 text-xs py-4">社群連結過於鬆散，無法識別經紀人 (Score=0)</div>';
+            } else {
+                container.innerHTML = sortedBrokers.map((item, idx) => {
+                    const uid = item[0];
+                    const score = item[1].toFixed(1); // Format score
+                    const user = students.find(s => s.id === uid);
+                    const name = user ? user.name : uid;
+                    const colors = ['bg-yellow-100 text-yellow-700 border-yellow-300', 'bg-slate-100 text-slate-600', 'bg-slate-50 text-slate-500'];
+                    const icons = ['fa-crown', 'fa-medal', 'fa-award'];
+                    
+                    return `
+                    <div class="flex items-center justify-between p-2 rounded border ${colors[idx] || colors[2]}">
+                        <div class="flex items-center gap-3">
+                            <div class="w-6 h-6 rounded-full bg-white flex items-center justify-center text-xs shadow-sm"><i class="fas ${icons[idx]}"></i></div>
+                            <span class="font-bold text-sm">${name}</span>
+                        </div>
+                        <div class="text-xs font-mono opacity-80">Score: ${score}</div>
+                    </div>`;
+                }).join('');
+            }
         }
 
         // Generate Offline Diagnosis String
@@ -747,6 +1126,8 @@
             const d = parseFloat(stats.density || 0);
             const n = parseInt(stats.totalNotes || 0);
             const r = parseInt(stats.raRate || 0);
+            const g = parseFloat(stats.gini || 0);
+            const td = parseFloat(stats.threadDepth || 0);
 
             if (key === 'density') {
                 if(d < 0.2) return "目前社群密度偏低 (<0.2)，對話較為發散。建議鼓勵學生使用「延伸 (Build-on)」鷹架來回應他人。";
@@ -807,6 +1188,25 @@
             if (key === 'lexical_fingerprint') {
                 return "詞彙指紋顯示該學生最常貢獻的關鍵詞。這有助於識別其在社群中的「專長領域」或關注焦點。";
             }
+            // New Insights
+            if (key === 'gini') {
+                if (g > 0.5) return "發言集中度過高！少數學生主導了大部分討論，請鼓勵安靜的學生參與。";
+                return "班級發言分佈相對平均，顯示良好的參與平等性。";
+            }
+            if (key === 'thread_depth') {
+                if (td < 2) return "對話串普遍較短，多為「問-答」模式。請引導學生進行追問或反駁，以加深討論。";
+                return "平均對話串長度良好，顯示學生正在進行持續深入的探究。";
+            }
+            if (key === 'kb_trajectory') {
+                return "此圖顯示「問題」與「理論」的累積趨勢。理想情況下，兩條線應同步上升，代表問題驅動了理論的生成。";
+            }
+            if (key === 'lag_sequence') {
+                return "此矩陣顯示了思考的慣性。若「提問 -> 延伸」比例高，代表討論發散；若「改進 -> 整合」比例高，代表知識正在深化。";
+            }
+            if (key === 'brokers') {
+                return "知識經紀人是那些「跨組連結者」。即使他們發言量不是最多，但對於打破同溫層、促進全班知識流動至關重要。";
+            }
+            
             return "數據分析完成。請參考圖表指標進行教學調整。";
         }
 
@@ -818,7 +1218,8 @@
             const msgs = [];
             msgs.push(generateLocalInsight('density', stats));
             msgs.push(generateLocalInsight('rise_above', stats));
-            if (stats.riskCount > 0) msgs.push(generateLocalInsight('risk', stats));
+            if(stats.gini) msgs.push(generateLocalInsight('gini', stats));
+            if(stats.threadDepth) msgs.push(generateLocalInsight('thread_depth', stats));
 
             container.innerHTML = `<ul class="list-disc pl-5 space-y-2">${msgs.map(m => `<li>${m}</li>`).join('')}</ul>`;
         }
@@ -927,7 +1328,6 @@
             }, 600);
         }
 
-        // --- REVISED: ADVANCED STUDENT METRICS ---
         function calculateStudentMetrics(db, userId) {
             if (!db || !db.userList) return null;
             const user = Object.values(db.userList).find(u => u.id === userId);
@@ -2241,6 +2641,32 @@
                 title: '詞彙貢獻指紋 (Lexical Contribution Fingerprint)',
                 theory: '透過分析學生筆記中的高頻關鍵詞，我們可以識別該學生在社群知識庫中的「獨特貢獻領域」。這是評估「觀點多樣性」與「專業知識互補」的重要指標。',
                 cite: 'Bereiter, C. (2002). Education and mind in the knowledge age.'
+            },
+            // New Insights
+            'gini': {
+                title: '參與平等性 (Gini Coefficient)',
+                theory: '吉尼係數用於衡量班級知識貢獻的不平等程度。知識建構強調「民主化知識」，即每位學生都應是合法的周邊參與者並逐漸成為核心貢獻者。0 代表完全平等，1 代表完全不平等。',
+                cite: 'Oshima, J., et al. (2006). Knowledge building in a hypermedia learning environment.'
+            },
+            'thread_depth': {
+                title: '平均對話深度 (Average Thread Depth)',
+                theory: '對話深度反映了持續探究 (Sustained Inquiry) 的能力。淺層對話（深度 1-2）通常僅涉及資訊交換，深層對話（深度 >3）則更有可能涉及解釋、論證與理論修正。',
+                cite: 'Hakkarainen, K. (2003). Progressive inquiry in a computer‐supported science learning environment.'
+            },
+            'kb_trajectory': {
+                title: '知識推進軌跡 (Knowledge Advancement Trajectory)',
+                theory: '追蹤「問題提出」與「理論建構」隨時間的累積趨勢。理想的軌跡應顯示問題與理論同步增長，代表社群能針對問題持續產出解釋與整合。',
+                cite: 'Reimann, P. (2009). Time is precious: Variable-and event-centred approaches to process analysis.'
+            },
+            'lag_sequence': {
+                title: '言談序列轉移 (Discourse Moves)',
+                theory: '分析對話的微觀結構。例如，當學生提出「問題」後，接下來最常發生的是「延伸」還是「改進」？高比例的「改進->改進」序列是深度知識建構的特徵。',
+                cite: 'Jeong, A. C. (2003). The sequential analysis of group interaction and critical thinking.'
+            },
+            'brokers': {
+                title: '知識經紀人 (Knowledge Brokers)',
+                theory: '中介中心性 (Betweenness Centrality) 高的學生，雖然發言量不一定最多，但他們連接著不同的討論群體，是跨組知識擴散的關鍵橋樑。',
+                cite: 'Zhang, J., et al. (2009). Social network analysis of knowledge building discourse.'
             }
         };
 
@@ -2251,6 +2677,8 @@
             const d = parseFloat(stats.density);
             const r = stats.raRate;
             const avgNotes = stats.studentCount > 0 ? (n / stats.studentCount).toFixed(1) : 0;
+            const gini = stats.gini;
+            const threadDepth = stats.threadDepth;
 
             if (key === 'total_notes') {
                 html = `<ul class="list-disc pl-4 space-y-1">
@@ -2369,6 +2797,36 @@
                 html = `<ul class="list-disc pl-4 space-y-1">
                     <li><strong>概念指紋：</strong>這是該學生最常使用的學術詞彙，反映了他的關注焦點。</li>
                     <li><strong>教學應用：</strong>若發現某學生的關鍵詞與全班主流不同，可能代表他正在開闢新的探究路徑，值得鼓勵分享。</li>
+                </ul>`;
+            }
+            else if (key === 'gini') {
+                html = `<ul class="list-disc pl-4 space-y-1">
+                    <li><strong>數值解讀：</strong>${gini} (${gini < 0.4 ? '分配平均' : (gini < 0.6 ? '差距稍大' : '嚴重不均')})。</li>
+                    <li><strong>教學意義：</strong>若數值過高，代表只有少數「學霸」在發言。理想的知識建構應是全員參與，共同推進知識。</li>
+                </ul>`;
+            }
+            else if (key === 'thread_depth') {
+                html = `<ul class="list-disc pl-4 space-y-1">
+                    <li><strong>平均深度：</strong>${threadDepth} 層。</li>
+                    <li><strong>教學意義：</strong>深度代表了想法被改進的次數。淺層對話 (Depth < 2) 通常意味著學生只是在「分享資訊」而非「建構知識」。</li>
+                </ul>`;
+            }
+            else if (key === 'kb_trajectory') {
+                html = `<ul class="list-disc pl-4 space-y-1">
+                    <li><strong>圖表意義：</strong>藍線代表問題的累積，紫線代表理論的累積。</li>
+                    <li><strong>理想型態：</strong>兩條線應同步成長。若藍線高但紫線低，代表「問而不答」；若紫線高但藍線低，代表缺乏問題意識，可能只是在堆砌資料。</li>
+                </ul>`;
+            }
+            else if (key === 'lag_sequence') {
+                html = `<ul class="list-disc pl-4 space-y-1">
+                    <li><strong>矩陣意義：</strong>橫列代表「發起類型」，直行代表「回應類型」。</li>
+                    <li><strong>深色格子：</strong>代表該轉移模式發生頻率高。理想中應看見「改進→改進」或「改進→整合」有較高機率。</li>
+                </ul>`;
+            }
+            else if (key === 'brokers') {
+                html = `<ul class="list-disc pl-4 space-y-1">
+                    <li><strong>角色定義：</strong>經紀人是指那些連結了不同小團體的人物。</li>
+                    <li><strong>教學應用：</strong>請善用這些學生來進行跨組分享，因為他們的社會資本最高，最容易被不同群體接受。</li>
                 </ul>`;
             }
             else {
