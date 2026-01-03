@@ -64,7 +64,7 @@
         }
         .insight-title i { margin-right: 0.25rem; }
 
-        /* Modal Styles */
+        /* Modal Styles - Mobile Optimized */
         .modal {
             display: none; 
             position: fixed; 
@@ -73,21 +73,25 @@
             top: 0;
             width: 100%; 
             height: 100%; 
-            overflow: auto; 
+            overflow: auto; /* Enable scroll if needed */
             background-color: rgba(0,0,0,0.5); 
             backdrop-filter: blur(2px);
             align-items: center;
             justify-content: center;
+            padding: 1rem; /* Add padding for mobile */
         }
         .modal-content {
             background-color: #fefefe;
             margin: auto;
             padding: 0;
             border-radius: 12px;
-            width: 90%;
+            width: 100%; /* Full width on mobile */
             max-width: 500px;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
             animation: modalFadeIn 0.3s;
+            max-height: 90vh; /* Max height for mobile */
+            display: flex;
+            flex-direction: column;
         }
         @keyframes modalFadeIn {
             from {opacity: 0; transform: scale(0.95);}
@@ -102,12 +106,18 @@
             background-color: #f9fafb;
             border-top-left-radius: 12px;
             border-top-right-radius: 12px;
+            flex-shrink: 0; /* Header stays fixed */
+        }
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto; /* Scrollable body */
         }
         .close {
             color: #aaa;
             font-size: 28px;
             font-weight: bold;
             cursor: pointer;
+            padding: 0 0.5rem; /* Bigger touch target */
         }
         .close:hover,
         .close:focus {
@@ -157,61 +167,53 @@
             color: #6366f1;
             background: #f1f5f9;
         }
-        
-        /* General Modal Overlay for non-ref modals */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6);
-            display: flex; justify-content: center; align-items: center; z-index: 100;
-            opacity: 0; visibility: hidden; transition: all 0.3s; backdrop-filter: blur(2px);
-        }
-        .modal-overlay.open { opacity: 1; visibility: visible; }
     </style>
 </head>
 <body class="text-gray-800">
 
     <!-- 頂部導航 -->
     <nav class="bg-indigo-600 text-white shadow-lg sticky top-0 z-50">
-        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
+        <div class="container mx-auto px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-0">
+            <div class="flex items-center space-x-3 w-full sm:w-auto justify-center sm:justify-start">
                 <i class="fas fa-compass text-2xl"></i>
                 <div>
-                    <h1 class="text-xl font-bold">知識羅盤 Knowledge Compass</h1>
-                    <p class="text-xs text-indigo-200">後設認知與成長歷程 (Student Portfolio)</p>
+                    <h1 class="text-lg sm:text-xl font-bold">知識羅盤 Knowledge Compass</h1>
+                    <p class="text-xs text-indigo-200 hidden sm:block">後設認知與成長歷程 (Student Portfolio)</p>
                 </div>
             </div>
-            <div class="flex items-center space-x-4">
-                <div class="flex items-center gap-3 mr-4">
-                    <a href="index.html" class="nav-btn bg-indigo-700 hover:bg-indigo-500 px-3 py-1.5 rounded text-xs font-bold transition flex items-center gap-1 border border-indigo-500">
-                        <i class="fas fa-home"></i> <span>首頁</span>
+            <div class="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto justify-center sm:justify-end overflow-x-auto pb-1 sm:pb-0">
+                <div class="flex items-center gap-2 mr-2">
+                    <a href="index.html" class="nav-btn bg-indigo-700 hover:bg-indigo-500 px-2 sm:px-3 py-1.5 rounded text-xs font-bold transition flex items-center gap-1 border border-indigo-500 whitespace-nowrap">
+                        <i class="fas fa-home"></i> <span class="hidden sm:inline">首頁</span>
                     </a>
-                    <a href="Knowledge Building Forum.html" class="nav-btn bg-indigo-700 hover:bg-indigo-500 px-3 py-1.5 rounded text-xs font-bold transition flex items-center gap-1 border border-indigo-500">
-                        <i class="fas fa-comments"></i> <span>論壇</span>
+                    <a href="Knowledge Building Forum.html" class="nav-btn bg-indigo-700 hover:bg-indigo-500 px-2 sm:px-3 py-1.5 rounded text-xs font-bold transition flex items-center gap-1 border border-indigo-500 whitespace-nowrap">
+                        <i class="fas fa-comments"></i> <span class="hidden sm:inline">論壇</span>
                     </a>
-                    <button onclick="syncData()" id="sync-btn" class="nav-btn bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 rounded text-xs font-bold transition flex items-center gap-1 border border-emerald-500">
-                        <i class="fas fa-sync-alt"></i> <span>刷新</span>
+                    <button onclick="syncData()" id="sync-btn" class="nav-btn bg-emerald-600 hover:bg-emerald-500 px-2 sm:px-3 py-1.5 rounded text-xs font-bold transition flex items-center gap-1 border border-emerald-500 whitespace-nowrap">
+                        <i class="fas fa-sync-alt"></i> <span class="hidden sm:inline">刷新</span>
                     </button>
                 </div>
                 <div class="text-right hidden md:block">
                     <span class="block font-bold" id="user-name">訪客</span>
                     <span class="text-xs text-indigo-200">學習者</span>
                 </div>
-                <img id="current-user-avatar" src="https://ui-avatars.com/api/?name=User&background=random" class="w-10 h-10 rounded-full border-2 border-white">
+                <img id="current-user-avatar" src="https://ui-avatars.com/api/?name=User&background=random" class="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-white flex-shrink-0">
                 <div id="nav-user-select-container"></div>
             </div>
         </div>
     </nav>
 
     <!-- 主要內容區 -->
-    <main class="container mx-auto px-6 py-8 space-y-8 fade-in">
+    <main class="container mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 sm:space-y-8 fade-in pb-20">
 
         <!-- ========================================== -->
         <!-- 模組 1: 使用者知識角色 -->
         <!-- ========================================== -->
         <section class="card bg-gradient-to-r from-white to-blue-50 border border-blue-100 relative overflow-hidden">
              <!-- 背景裝飾 -->
-             <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-blue-100 rounded-full opacity-50 blur-2xl"></div>
+             <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-blue-100 rounded-full opacity-50 blur-2xl pointer-events-none"></div>
 
-             <div class="flex flex-col md:flex-row items-center gap-8 relative z-10">
+             <div class="flex flex-col md:flex-row items-center gap-6 sm:gap-8 relative z-10">
                  <!-- 左側：角色稱號 -->
                  <div class="w-full md:w-1/3 text-center md:text-left md:border-r border-gray-200 md:pr-8">
                      <div class="flex items-center justify-center md:justify-start mb-3">
@@ -223,15 +225,15 @@
                         </button>
                      </div>
                      <div class="flex items-center justify-center md:justify-start gap-5">
-                         <div class="w-20 h-20 bg-indigo-600 rounded-full flex items-center justify-center text-white text-3xl shadow-xl ripple-effect">
-                             <div id="user-avatar-large" class="text-2xl font-bold">?</div>
+                         <div class="w-16 h-16 sm:w-20 sm:h-20 bg-indigo-600 rounded-full flex items-center justify-center text-white text-2xl sm:text-3xl shadow-xl ripple-effect flex-shrink-0">
+                             <div id="user-avatar-large" class="text-xl sm:text-2xl font-bold">?</div>
                          </div>
                          <div>
-                             <h3 class="text-2xl font-bold text-indigo-900" id="role-title">探索者</h3>
-                             <p class="text-sm text-indigo-600 font-medium" id="role-subtitle">The Knowledge Explorer</p>
+                             <h3 class="text-xl sm:text-2xl font-bold text-indigo-900" id="role-title">探索者</h3>
+                             <p class="text-xs sm:text-sm text-indigo-600 font-medium" id="role-subtitle">The Knowledge Explorer</p>
                          </div>
                      </div>
-                     <div class="mt-4 bg-white/60 p-3 rounded-lg text-sm text-gray-600 leading-relaxed border border-white" id="role-desc">
+                     <div class="mt-4 bg-white/60 p-3 rounded-lg text-sm text-gray-600 leading-relaxed border border-white text-left" id="role-desc">
                          <i class="fas fa-quote-left text-indigo-300 mr-1"></i>
                          正在分析你的發言模式...
                      </div>
@@ -239,84 +241,83 @@
                  
                  <!-- 右側：四種能力指標 (Dynamic) -->
                  <div class="w-full md:w-2/3">
-                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                     <div class="grid grid-cols-2 gap-3 sm:gap-4">
                          <!-- 能力 1: 開創力 -->
-                         <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center hover:shadow-md transition relative">
+                         <div class="bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-gray-100 text-center hover:shadow-md transition relative">
                              <button onclick="openRefModal('initiator')" class="ref-btn-mini"><i class="fas fa-info-circle"></i></button>
-                             <div class="text-gray-400 text-xs mb-1">開創力 (Initiator)</div>
-                             <div class="text-lg font-bold text-gray-800" id="role-initiator-val">--%</div>
+                             <div class="text-gray-400 text-[10px] sm:text-xs mb-1">開創力 (Initiator)</div>
+                             <div class="text-base sm:text-lg font-bold text-gray-800" id="role-initiator-val">--%</div>
                              <div class="w-full bg-gray-100 rounded-full h-1.5 mt-2">
                                  <div class="bg-blue-400 h-1.5 rounded-full" id="role-initiator-bar" style="width: 0%"></div>
                              </div>
                          </div>
                          <!-- 能力 2: 連結力 -->
-                         <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center hover:shadow-md transition relative">
+                         <div class="bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-gray-100 text-center hover:shadow-md transition relative">
                              <button onclick="openRefModal('builder')" class="ref-btn-mini"><i class="fas fa-info-circle"></i></button>
-                             <div class="text-gray-400 text-xs mb-1">連結力 (Builder)</div>
-                             <div class="text-lg font-bold text-gray-800" id="role-builder-val">--%</div>
+                             <div class="text-gray-400 text-[10px] sm:text-xs mb-1">連結力 (Builder)</div>
+                             <div class="text-base sm:text-lg font-bold text-gray-800" id="role-builder-val">--%</div>
                              <div class="w-full bg-gray-100 rounded-full h-1.5 mt-2">
                                  <div class="bg-indigo-600 h-1.5 rounded-full" id="role-builder-bar" style="width: 0%"></div>
                              </div>
                          </div>
                          <!-- 能力 3: 整合力 -->
-                         <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center hover:shadow-md transition relative">
+                         <div class="bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-gray-100 text-center hover:shadow-md transition relative">
                              <button onclick="openRefModal('synthesizer')" class="ref-btn-mini"><i class="fas fa-info-circle"></i></button>
-                             <div class="text-gray-400 text-xs mb-1">整合力 (Synthesizer)</div>
-                             <div class="text-lg font-bold text-gray-800" id="role-synthesizer-val">--%</div>
+                             <div class="text-gray-400 text-[10px] sm:text-xs mb-1">整合力 (Synthesizer)</div>
+                             <div class="text-base sm:text-lg font-bold text-gray-800" id="role-synthesizer-val">--%</div>
                              <div class="w-full bg-gray-100 rounded-full h-1.5 mt-2">
                                  <div class="bg-purple-400 h-1.5 rounded-full" id="role-synthesizer-bar" style="width: 0%"></div>
                              </div>
                          </div>
                          <!-- 能力 4: 維護力 -->
-                         <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center hover:shadow-md transition relative">
+                         <div class="bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-gray-100 text-center hover:shadow-md transition relative">
                              <button onclick="openRefModal('sustainer')" class="ref-btn-mini"><i class="fas fa-info-circle"></i></button>
-                             <div class="text-gray-400 text-xs mb-1">維護力 (Sustainer)</div>
-                             <div class="text-lg font-bold text-gray-800" id="role-sustainer-val">--%</div>
+                             <div class="text-gray-400 text-[10px] sm:text-xs mb-1">維護力 (Sustainer)</div>
+                             <div class="text-base sm:text-lg font-bold text-gray-800" id="role-sustainer-val">--%</div>
                              <div class="w-full bg-gray-100 rounded-full h-1.5 mt-2">
                                  <div class="bg-green-400 h-1.5 rounded-full" id="role-sustainer-bar" style="width: 0%"></div>
                              </div>
                          </div>
                      </div>
                      <!-- 說明 -->
-                     <div class="insight-box bg-white/50 border-blue-200 mt-4">
-                         <div class="insight-title text-blue-800"><i class="fas fa-info-circle"></i> 角色分析說明</div>
-                         這些指標反映了你在社群中的動態貢獻。數值是根據你相對於全班平均的表現計算得出的相對強度 (0-100%)。每個角色對於知識建構都不可或缺。
+                     <div class="insight-box bg-white/50 border-blue-200 mt-4 text-[10px] sm:text-xs">
+                         <div class="insight-title text-blue-800 text-xs sm:text-sm"><i class="fas fa-info-circle"></i> 角色分析說明</div>
+                         這些指標反映了你在社群中的動態貢獻。數值是根據你相對於全班平均的表現計算得出的相對強度 (0-100%)。
                      </div>
                  </div>
              </div>
         </section>
 
         <!-- 2. 核心數據概覽 (Core Metrics) WITH REF BUTTONS -->
-        <section class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <section class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
             <!-- Card 1 -->
             <div class="card border-l-4 border-blue-500 py-4 group hover:shadow-lg transition relative">
                 <button onclick="openRefModal('created')" class="absolute top-2 right-2 ref-btn"><i class="fas fa-info-circle mr-1"></i> Ref.</button>
-                <h3 class="text-gray-500 text-xs font-medium uppercase">我的貢獻 (Created)</h3>
+                <h3 class="text-gray-500 text-[10px] sm:text-xs font-medium uppercase">我的貢獻 (Created)</h3>
                 <div class="mt-1 flex items-baseline">
-                     <span class="text-2xl font-bold text-gray-900" id="card-created-val">0</span>
-                     <span class="ml-2 text-xs text-green-600 font-bold" id="stat-created-trend"></span>
+                     <span class="text-xl sm:text-2xl font-bold text-gray-900" id="card-created-val">0</span>
                 </div>
             </div>
             
             <!-- Card 2 -->
             <div class="card border-l-4 border-green-500 py-4 group hover:shadow-lg transition relative">
                 <button onclick="openRefModal('read')" class="absolute top-2 right-2 ref-btn"><i class="fas fa-info-circle mr-1"></i> Ref.</button>
-                <h3 class="text-gray-500 text-xs font-medium uppercase">閱讀他人 (Read)</h3>
-                <div class="mt-1 text-2xl font-bold text-gray-900" id="card-read-val">0</div>
+                <h3 class="text-gray-500 text-[10px] sm:text-xs font-medium uppercase">閱讀他人 (Read)</h3>
+                <div class="mt-1 text-xl sm:text-2xl font-bold text-gray-900" id="card-read-val">0</div>
             </div>
             
             <!-- Card 3 -->
             <div class="card border-l-4 border-purple-500 py-4 group hover:shadow-lg transition relative">
                 <button onclick="openRefModal('buildon')" class="absolute top-2 right-2 ref-btn"><i class="fas fa-info-circle mr-1"></i> Ref.</button>
-                <h3 class="text-gray-500 text-xs font-medium uppercase">觀點連結 (Build-ons)</h3>
-                <div class="mt-1 text-2xl font-bold text-gray-900" id="card-buildon-val">0</div>
+                <h3 class="text-gray-500 text-[10px] sm:text-xs font-medium uppercase">觀點連結 (Build-ons)</h3>
+                <div class="mt-1 text-xl sm:text-2xl font-bold text-gray-900" id="card-buildon-val">0</div>
             </div>
             
             <!-- Card 4 -->
             <div class="card border-l-4 border-yellow-500 py-4 group hover:shadow-lg transition relative">
                 <button onclick="openRefModal('impact')" class="absolute top-2 right-2 ref-btn"><i class="fas fa-info-circle mr-1"></i> Ref.</button>
-                <h3 class="text-gray-500 text-xs font-medium uppercase">影響係數 (Impact)</h3>
-                <div class="mt-1 text-2xl font-bold text-gray-900" id="card-impact-val">0</div>
+                <h3 class="text-gray-500 text-[10px] sm:text-xs font-medium uppercase">影響係數 (Impact)</h3>
+                <div class="mt-1 text-xl sm:text-2xl font-bold text-gray-900" id="card-impact-val">0</div>
             </div>
         </section>
 
@@ -338,7 +339,7 @@
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-bold text-slate-700 flex items-center"><i class="fas fa-code-branch text-emerald-500 mr-2"></i> 最近的思考軌跡</h3>
                     <div class="flex items-center gap-2">
-                         <a href="Knowledge Building Forum.html" class="text-xs text-indigo-600 hover:underline font-bold mr-2">去論壇回應 ></a>
+                         <a href="Knowledge Building Forum.html" class="text-xs text-indigo-600 hover:underline font-bold mr-2 hidden sm:inline">去論壇回應 ></a>
                          <button onclick="openRefModal('evolution')" class="ref-btn"><i class="fas fa-info-circle mr-1"></i> Ref.</button>
                     </div>
                 </div>
@@ -363,8 +364,8 @@
 
             <div class="card border-l-4 border-indigo-500 bg-indigo-50/50">
                 <h3 class="font-bold text-indigo-900 mb-3 flex items-center"><i class="fas fa-robot text-indigo-600 mr-2"></i> 來自 AI 導師的建議</h3>
-                <div id="ai-feedback" class="space-y-4">
-                    <p class="text-sm text-slate-700"><i class="fas fa-circle-notch fa-spin text-indigo-400 mr-2"></i> 正在分析你的學習歷程...</p>
+                <div id="ai-feedback" class="text-sm text-slate-700 space-y-4 leading-relaxed">
+                    <p><i class="fas fa-circle-notch fa-spin text-indigo-400 mr-2"></i> 正在分析你的學習歷程...</p>
                 </div>
                 <div class="mt-4 text-right">
                     <button class="text-xs bg-white border border-indigo-200 px-3 py-1 rounded-full text-indigo-600 hover:bg-indigo-50 transition font-bold" onclick="refreshAIFeedback()">
@@ -462,11 +463,11 @@
     </div>
 
     <!-- Note Detail Modal (NEW) -->
-    <div id="note-detail-modal" class="modal-overlay" onclick="closeModal(event)">
-        <div class="modal-content max-w-lg" onclick="event.stopPropagation()">
+    <div id="note-detail-modal" class="modal" onclick="closeModalDirect(event, 'note-detail-modal')">
+        <div class="modal-content max-w-lg">
             <div class="modal-header bg-indigo-50">
                 <h3 class="text-lg font-bold text-indigo-900 flex items-center"><i class="fas fa-sticky-note mr-2"></i> 發言詳情</h3>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 transition"><i class="fas fa-times text-xl"></i></button>
+                <button onclick="document.getElementById('note-detail-modal').style.display='none'" class="text-slate-400 hover:text-slate-600 transition"><i class="fas fa-times text-xl"></i></button>
             </div>
             <div class="modal-body">
                 <div class="mb-4">
@@ -484,11 +485,11 @@
     </div>
 
     <!-- Ref Modal Structure -->
-    <div id="refModal" class="modal" onclick="closeRefModalOnClick(event)">
+    <div id="refModal" class="modal" onclick="closeModalDirect(event, 'refModal')">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2"><i class="fas fa-book-open text-indigo-500"></i> <span id="modalTitle">數據解析</span></h3>
-                <span class="close" onclick="closeRefModal()">&times;</span>
+                <span class="close" onclick="document.getElementById('refModal').style.display='none'">&times;</span>
             </div>
             <div class="modal-body space-y-5">
                 <!-- 1. 理論背景 -->
@@ -692,13 +693,13 @@
         modal.style.display = "flex";
     }
 
-    function closeRefModal() {
-        document.getElementById('refModal').style.display = "none";
+    function closeModal() {
+        document.getElementById('note-detail-modal').style.display = "none";
     }
 
-    function closeRefModalOnClick(event) {
-        if (event.target == document.getElementById('refModal')) {
-            closeRefModal();
+    function closeModalDirect(event, modalId) {
+        if (event.target == document.getElementById(modalId)) {
+            document.getElementById(modalId).style.display = "none";
         }
     }
 
@@ -859,7 +860,7 @@
 
             document.getElementById('role-title').innerText = bestRole;
             document.getElementById('role-subtitle').innerText = roleSub;
-            document.getElementById('role-desc').innerHTML = `<i class="fas fa-quote-left text-indigo-300 mr-1"></i> 根據分析，你在「${bestRole.split(' ')[0]}」方面表現最為突出。`;
+            document.getElementById('role-desc').innerHTML = `<i class="fas fa-quote-left text-indigo-300 mr-1"></i> 根據分析，你在「${bestRole}」方面表現最為突出。`;
 
             // Update New Indicator Bars
             document.getElementById('topic-count-val').innerText = stats.uniqueTopicsCount;
@@ -1079,6 +1080,14 @@
 
     // --- Init ---
     window.onload = function() {
+        // Global Keydown Listener for ESC
+        window.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") {
+                document.getElementById('refModal').style.display = "none";
+                document.getElementById('note-detail-modal').style.display = "none";
+            }
+        });
+
         const db = getRealData();
         if (db) {
             console.log("DB Loaded");
