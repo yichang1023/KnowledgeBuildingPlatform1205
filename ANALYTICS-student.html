@@ -859,7 +859,7 @@
 
             document.getElementById('role-title').innerText = bestRole;
             document.getElementById('role-subtitle').innerText = roleSub;
-            document.getElementById('role-desc').innerHTML = `<i class="fas fa-quote-left text-indigo-300 mr-1"></i> 根據分析，你在「${bestRole}」方面表現最為突出。這代表你${bestScore > 50 ? '積極' : '初步'}參與了知識建構活動，請繼續保持！`;
+            document.getElementById('role-desc').innerHTML = `<i class="fas fa-quote-left text-indigo-300 mr-1"></i> 根據分析，你在「${bestRole.split(' ')[0]}」方面表現最為突出。`;
 
             // Update New Indicator Bars
             document.getElementById('topic-count-val').innerText = stats.uniqueTopicsCount;
