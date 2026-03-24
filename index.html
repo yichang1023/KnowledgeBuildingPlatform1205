@@ -4,19 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>知識建構與智慧分析平台 | Knowledge Building Portal</title>
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-    <!-- Three.js for 3D Möbius Strip -->
+    
+    <!-- Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     
-    <!-- [Project AETHER] Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
-
     <script>
         tailwind.config = {
             theme: {
@@ -46,6 +46,7 @@
             }
         }
     </script>
+    
     <style>
         body { margin: 0; overflow-x: hidden; background-color: #0f172a; color: white; }
         #canvas-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.6; }
@@ -93,7 +94,6 @@
     </style>
 </head>
 <body class="min-h-screen flex flex-col font-sans">
-
     <div id="canvas-container"></div>
 
     <!-- Header -->
@@ -106,13 +106,12 @@
             </div>
         </div>
         <div class="text-xs text-slate-500 font-mono hidden md:block">
-            SYSTEM STATUS: <span id="system-status" class="text-yellow-500"><i class="fa-solid fa-circle-notch fa-spin"></i> CHECKING...</span>
+            SYSTEM STATUS: <span id="system-status" class="text-green-400 font-bold"><i class="fa-solid fa-check"></i> SYSTEM READY</span>
         </div>
     </header>
 
     <!-- Main Content -->
     <main class="relative z-10 flex-1 flex flex-col items-center justify-center p-4 md:p-8">
-        
         <div class="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8">
             
             <!-- Left Column: Introduction & Role -->
@@ -200,8 +199,8 @@
                         
                         <div class="space-y-2">
                             <div class="flex items-center justify-between text-xs">
-                                <span class="text-slate-400">Database Connection</span>
-                                <span id="db-connection-status" class="text-yellow-500 font-mono"><i class="fa-solid fa-circle-notch fa-spin text-[8px] mr-1"></i> CONNECTING...</span>
+                                <span class="text-slate-400">Storage Mode</span>
+                                <span class="text-green-400 font-mono"><i class="fa-solid fa-hard-drive text-[8px] mr-1"></i> LOCAL ONLY</span>
                             </div>
                             <div class="flex items-center justify-between text-xs">
                                 <span class="text-slate-400">Visualization Engine</span>
@@ -223,29 +222,12 @@
     </main>
 
     <script>
-        // [Project AETHER] 1. Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyDPjtxtf656JHVVlj1o4cLwSylo1jDBFAc",
-            authDomain: "kb-platform-1.firebaseapp.com",
-            databaseURL: "https://kb-platform-1-default-rtdb.firebaseio.com",
-            projectId: "kb-platform-1",
-            storageBucket: "kb-platform-1.firebasestorage.app",
-            messagingSenderId: "230026226847",
-            appId: "1:230026226847:web:49e6f09ddfc3de0ef046aa"
-        };
-        // Initialize Firebase
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        const db = firebase.firestore();
-
-        // [Project AETHER] 2. Logic Controller
+        // [Project AETHER] Logic Controller
         let selectedRole = null;
 
         // Init Check
         window.onload = function() {
             initThreeJS();
-            checkCloudConnection(); // ★ Start Connectivity Check
             
             // Restore saved API Key
             const savedKey = localStorage.getItem('kb_ai_key');
@@ -260,32 +242,6 @@
                 selectRole(role);
             }
         };
-
-        // ★ New Function: Active Cloud Check
-        async function checkCloudConnection() {
-            const statusEl = document.getElementById('system-status');
-            const detailEl = document.getElementById('db-connection-status');
-            
-            try {
-                // Try to fetch 1 document to prove connection
-                // We use kb_users because it's usually populated
-                await db.collection('kb_users').limit(1).get();
-                
-                // Success
-                statusEl.innerHTML = '<i class="fa-solid fa-link"></i> CLOUD CONNECTED';
-                statusEl.className = 'text-green-400 font-bold animate-pulse';
-                detailEl.innerHTML = '<i class="fa-solid fa-circle text-[8px] mr-1"></i> FIREBASE ONLINE';
-                detailEl.className = 'text-green-400 font-mono';
-                console.log("[Cloud] Connection verified.");
-            } catch (error) {
-                // Fail
-                console.error("[Cloud] Connection failed:", error);
-                statusEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> OFFLINE';
-                statusEl.className = 'text-red-500 font-bold';
-                detailEl.innerHTML = '<i class="fa-solid fa-xmark text-[8px] mr-1"></i> CONNECTION FAILED';
-                detailEl.className = 'text-red-500 font-mono';
-            }
-        }
 
         function selectRole(role) {
             selectedRole = role;
@@ -368,7 +324,7 @@
             }
         }
 
-        // [Visual] Three.js Möbius Strip Background
+        // [Visual] Three.js Background Animation (Fixed for r128 compatibility)
         function initThreeJS() {
             const container = document.getElementById('canvas-container');
             const scene = new THREE.Scene();
@@ -378,22 +334,14 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             container.appendChild(renderer.domElement);
 
-            // Möbius Strip Geometry
-            const geometry = new THREE.ParametricGeometry((u, v, target) => {
-                u = u * 2 * Math.PI;
-                v = v * 2 - 1;
-                v = v * 0.5; // Width
-                const x = (1 + v * Math.cos(u / 2)) * Math.cos(u);
-                const y = (1 + v * Math.cos(u / 2)) * Math.sin(u);
-                const z = v * Math.sin(u / 2);
-                target.set(x, y, z);
-            }, 100, 20);
-
-            const material = new THREE.PointsMaterial({ color: 0x4f46e5, size: 0.05, transparent: true, opacity: 0.8 });
+            // Replaced deprecated ParametricGeometry with TorusKnotGeometry for a similar continuous loop effect
+            const geometry = new THREE.TorusKnotGeometry(1.5, 0.4, 150, 20);
+            
+            const material = new THREE.PointsMaterial({ color: 0x4f46e5, size: 0.03, transparent: true, opacity: 0.8 });
             const particles = new THREE.Points(geometry, material);
             scene.add(particles);
 
-            camera.position.z = 3;
+            camera.position.z = 4;
 
             // Mouse interaction
             let mouseX = 0;
