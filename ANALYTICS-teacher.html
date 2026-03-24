@@ -5,13 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>KB 分析中樞 (旗艦學術版) | Teacher Dashboard v20.48 Stable</title>
     
-    <!-- ========================================== -->
-    <!-- 1. 引入 Firebase SDK -->
-    <!-- ========================================== -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-
     <!-- 核心函式庫 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -188,7 +181,7 @@
         </div>
 
         <div class="px-2 pt-4 pb-2">
-            <a href="index.html" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700 transition hover:text-white border border-slate-700">
+            <a href="#" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700 transition hover:text-white border border-slate-700">
                 <i class="fas fa-home w-5 text-blue-400"></i><span class="font-bold">返回首頁</span>
             </a>
         </div>
@@ -202,23 +195,23 @@
             <button onclick="switchView('academic')" id="nav-academic" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-r-lg hover:bg-slate-800 transition text-left text-purple-300 hover:text-purple-200"><i class="fas fa-graduation-cap w-5"></i><span>學術深度指標 (Academic)</span></button>
             
             <div class="pt-4 mt-4 border-t border-slate-800">
-                <a href="Knowledge Building Forum.html" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-r-lg hover:bg-slate-800 transition text-left text-blue-400 hover:text-blue-300">
+                <a href="#" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-r-lg hover:bg-slate-800 transition text-left text-blue-400 hover:text-blue-300">
                     <i class="fas fa-comments w-5"></i><span>前往論壇 (Forum)</span>
                 </a>
                 
                 <!-- 新增：前往知識輪盤 -->
-                <a href="ANALYTICS-student.html" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-r-lg hover:bg-slate-800 transition text-left text-amber-400 hover:text-amber-300 mt-1">
+                <a href="#" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-r-lg hover:bg-slate-800 transition text-left text-amber-400 hover:text-amber-300 mt-1">
                     <i class="fas fa-dharmachakra w-5"></i><span>前往知識輪盤 (Roulette)</span>
                 </a>
 
                 <button onclick="refreshDashboardData()" id="btn-refresh" class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-r-lg hover:bg-slate-800 transition text-left text-green-400 hover:text-green-300 mt-1">
-                    <i class="fas fa-sync-alt w-5"></i><span>刷新數據 (Sync Data)</span>
+                    <i class="fas fa-sync-alt w-5"></i><span>刷新數據 (Reload Data)</span>
                 </button>
             </div>
         </nav>
         <div class="p-4 bg-slate-950 border-t border-slate-800 text-xs text-slate-500 shrink-0">
-            System: <span class="text-green-500">Connected</span><br>
-            DB Status: <span id="db-status-text">Checking...</span><br>
+            System: <span class="text-green-500">Local Mode</span><br>
+            DB Status: <span id="db-status-text">Ready</span><br>
             AI Status: <span id="ai-status-indicator" class="text-slate-400">Init...</span>
         </div>
     </aside>
@@ -623,9 +616,38 @@
     </main>
 
     <!-- ========================================== -->
-    <!-- 2. 引入雲端外掛 (Core Engine) -->
+    <!-- Mock Engine / Mock Data Generation         -->
+    <!-- (Replaces the external kb-cloud-engine.js) -->
     <!-- ========================================== -->
-    <script src="kb-cloud-engine.js"></script>
+    <script>
+        // MOCK DATA INJECTION TO ENSURE STANDALONE EXECUTION
+        window.state = {
+            topics: [
+                { id: 't1', name: '氣候變遷的影響與對策' },
+                { id: 't2', name: 'AI 技術的未來發展' }
+            ],
+            userList: {
+                'u1': { id: 'u1', name: '小明', role: 'student' },
+                'u2': { id: 'u2', name: '阿華', role: 'student' },
+                'u3': { id: 'u3', name: '莉莉', role: 'student' },
+                'u4': { id: 'u4', name: '建國', role: 'student' },
+                'u5': { id: 'u5', name: '美玲', role: 'student' },
+                'teacher1': { id: 'teacher1', name: '王老師', role: 'teacher' }
+            },
+            nodes: [
+                { id: 'n1', topicId: 't1', type: 'question', title: '為什麼最近天氣這麼熱？', content: '我覺得最近的夏天越來越長了，這是為什麼？有人知道嗎？', author: 'u1', date: '2023-10-01T09:00:00Z', parentId: null },
+                { id: 'n2', topicId: 't1', type: 'theory', title: '溫室效應導致', content: '這是因為二氧化碳增加導致溫室效應加劇，熱量被困在大氣層裡。', author: 'u2', date: '2023-10-01T10:30:00Z', parentId: 'n1' },
+                { id: 'n3', topicId: 't1', type: 'extend', title: '海平面也在上升', content: '對啊，不僅天氣熱，我看到新聞說海平面也在上升，北極熊快沒地方住了。', author: 'u3', date: '2023-10-01T11:15:00Z', parentId: 'n2' },
+                { id: 'n4', topicId: 't1', type: 'improve', title: '碳排放是主因', content: '其實不只是二氧化碳，還有甲烷等氣體。工業發展和畜牧業排放了大量的碳。', author: 'u4', date: '2023-10-02T08:20:00Z', parentId: 'n2' },
+                { id: 'n5', topicId: 't1', type: 'counter', title: '太陽活動也有影響吧？', content: '難道完全是人類造成的嗎？地球歷史上也有過很熱的時期，可能是太陽活動週期？', author: 'u5', date: '2023-10-02T09:40:00Z', parentId: 'n4' },
+                { id: 'n6', topicId: 't1', type: 'riseabove', title: '綜合來看：人為與自然雙重影響', content: '綜合大家的觀點，雖然地球有自然週期，但工業革命以來的碳排放（溫室氣體）極大地加速了變暖過程。我們應該關注如何減少碳足跡。', author: 'u1', date: '2023-10-03T10:00:00Z', parentId: 'n5' },
+                { id: 'n7', topicId: 't2', type: 'question', title: 'AI 會取代我們的工作嗎？', content: '看到 ChatGPT 這麼厲害，很擔心以後找不到工作。大家怎麼看？', author: 'u3', date: '2023-10-04T13:00:00Z', parentId: null },
+                { id: 'n8', topicId: 't2', type: 'extend', title: '可能取代重複性工作', content: '我覺得像是數據輸入、基礎翻譯等重複性高的工作很可能會被取代。', author: 'u4', date: '2023-10-04T14:30:00Z', parentId: 'n7' },
+                { id: 'n9', topicId: 't2', type: 'improve', title: 'AI 是一種工具', content: '與其說取代，不如說 AI 是強大的工具。掌握 AI 應用的人會取代不會用 AI 的人。', author: 'u2', date: '2023-10-05T09:10:00Z', parentId: 'n8' },
+                { id: 'n10', topicId: 't2', type: 'riseabove', title: '轉型與終身學習', content: '總結一下，AI 會淘汰部分工作，但也會創造新工作（如 AI 詠唱師）。關鍵是我們要具備終身學習的能力與創造力。', author: 'u5', date: '2023-10-06T11:00:00Z', parentId: 'n9' }
+            ]
+        };
+    </script>
 
     <script>
         // --- 0. 全域狀態與設置 (保留原檔邏輯) ---
@@ -670,10 +692,10 @@
             if(lensInteractions['Synthesis']) lensInteractions['Synthesis'].example = findNote(['riseabove']);
         }
 
-        // --- 1. 資料庫連接核心 (Cloud-Aware Modification) ---
+        // --- 1. 資料存取核心 (Local/Mock Data) ---
         function getRealData() {
             if (window.state && window.state.nodes && window.state.nodes.length > 0) {
-                console.log("Teacher Analytics: Reading from Cloud Engine (window.state)");
+                console.log("Teacher Analytics: Reading from local state (window.state)");
                 return { nodes: window.state.nodes, topics: window.state.topics, userList: window.state.userList };
             }
             const raw = localStorage.getItem(STORAGE_KEY);
@@ -878,10 +900,10 @@
                     }
                 });
 
-                let html = `<table class="seq-table"><tr class="seq-header-row"><th>From \\ To</th>${types.map(t => `<th class="text-xs">${labels[t]}</th>`).join('')}</tr>`;
+                let html = `<table class="seq-table w-full text-center border-collapse"><tr class="seq-header-row border-b"><th class="p-2 text-slate-500">From \\ To</th>${types.map(t => `<th class="p-2 text-xs font-bold text-slate-600">${labels[t]}</th>`).join('')}</tr>`;
                 
                 types.forEach(rowType => {
-                    html += `<tr><th class="text-xs">${labels[rowType]}</th>`;
+                    html += `<tr class="border-b"><th class="p-2 text-xs font-bold text-slate-600">${labels[rowType]}</th>`;
                     types.forEach(colType => {
                         const count = matrix[rowType][colType];
                         const rowTotal = types.reduce((acc, t) => acc + matrix[rowType][t], 0);
@@ -893,7 +915,7 @@
                             if(pct > 50) text = 'white';
                             else text = '#1e3a8a';
                         }
-                        html += `<td><div class="seq-cell" style="background-color:${bg}; color:${text}">${pct}%</div></td>`;
+                        html += `<td class="p-1"><div class="seq-cell rounded py-1 px-2" style="background-color:${bg}; color:${text}">${pct}%</div></td>`;
                     });
                     html += `</tr>`;
                 });
@@ -924,7 +946,7 @@
                 const S = []; const P = {}; const sigma = {}; const d = {};
                 studentIds.forEach(v => { P[v] = []; sigma[v] = 0; d[v] = -1; });
                 sigma[s] = 1; d[s] = 0;
-                const Q = [s]; 
+                const Q = [s];
                 
                 while (Q.length > 0) {
                     const v = Q.shift(); S.push(v);
@@ -965,13 +987,21 @@
             }
         }
 
-        // [Original generateLocalInsight, renderStaticDiagnosis, etc.]
         function generateLocalInsight(key, stats) {
             const d = parseFloat(stats.density || 0);
             if (key === 'density') {
                 if(d < 0.2) return "目前社群密度偏低 (<0.2)，對話較為發散。建議鼓勵學生使用「延伸 (Build-on)」鷹架來回應他人。";
                 if(d < 0.5) return "社群互動狀況尚可 (0.2-0.5)，連結正在建立中。可嘗試指派「觀點摘要」任務以串聯發言。";
                 return "社群互動緊密 (>0.5)，對話熱絡。現在是引導學生進行「觀點整合 (Rise-above)」的最佳時機。";
+            }
+            if (key === 'rise_above') {
+                return stats.raRate < 5 ? "昇華率偏低，建議引導學生總結現有討論成果。" : "已有觀點昇華，可鼓勵繼續深化知識。";
+            }
+            if (key === 'gini' && stats.gini) {
+                return stats.gini > 0.4 ? "發言權分配不均，請多關注潛水學生的參與狀況。" : "發言權分配健康。";
+            }
+            if (key === 'thread_depth' && stats.threadDepth) {
+                return stats.threadDepth < 2 ? "對話較為扁平，建議提供深入探究的問題。" : "對話持續深入，表現良好。";
             }
             return "數據分析完成。";
         }
@@ -1015,20 +1045,20 @@
                 document.getElementById('topic-content-log').innerHTML = '<div class="text-center py-10 text-slate-400"><i class="fas fa-spinner fa-spin mr-2"></i>載入中...</div>';
                 
                 setTimeout(() => { 
-                    initConceptNetwork(); 
-                    initLexicalChart(); 
-                    initPromisingnessChart();
+                     initConceptNetwork(); 
+                     initLexicalChart(); 
+                     initPromisingnessChart();
                     initEvolutionTimeline();
                     initTopicContentAnalysis();
                     
                     const activeViewEl = document.querySelector('.section-view.active');
                     if (activeViewEl && activeViewEl.id === 'view-quality') { 
-                        initDeepLens(); 
-                        initStreamChart(); 
-                        initQualityNewMetrics(); // Updated trigger
+                         initDeepLens(); 
+                         initStreamChart(); 
+                         initQualityNewMetrics(); // Updated trigger
                     } 
-                    else if (activeViewEl && activeViewEl.id === 'view-academic') { initAcademicAnalysis(); } 
-                    else if (activeViewEl && activeViewEl.id === 'view-students') {
+                     else if (activeViewEl && activeViewEl.id === 'view-academic') { initAcademicAnalysis(); } 
+                     else if (activeViewEl && activeViewEl.id === 'view-students') {
                         const active = document.querySelector('.active-student');
                         if (active) loadStudentData(active.id.replace('student-btn-', ''));
                     }
@@ -1039,7 +1069,7 @@
         function refreshDashboardData() {
             const btn = document.getElementById('btn-refresh');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin w-5"></i><span>同步中...</span>';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin w-5"></i><span>載入中...</span>';
             btn.classList.add('opacity-75', 'cursor-not-allowed');
             
             setTimeout(() => {
@@ -1050,8 +1080,8 @@
                     const activeViewEl = document.querySelector('.section-view.active');
                     const s1 = document.getElementById('topic-selector-ideas');
                     if(s1) filterDataByTopic(s1.value); 
-                    if (activeViewEl && activeViewEl.id === 'view-academic') initAcademicAnalysis();
-                    document.getElementById('db-status-text').innerText = "Synced: " + new Date().toLocaleTimeString();
+                     if (activeViewEl && activeViewEl.id === 'view-academic') initAcademicAnalysis();
+                    document.getElementById('db-status-text').innerText = "Reloaded: " + new Date().toLocaleTimeString();
                     document.getElementById('db-status-text').className = "text-green-400 font-bold";
                 }
                 btn.innerHTML = originalText;
@@ -1081,7 +1111,7 @@
             
             const ctx1 = document.getElementById('principlesChart').getContext('2d');
             const typeCounts = { question:0, extend:0, improve:0, counter:0, riseabove:0 };
-            stats.nodes.forEach(n => { if (typeCounts[n.type] !== undefined) typeCounts[n.type]++; });
+            stats.nodes.forEach(n => { if (typeCounts[n.type] !== undefined) typeCounts[n.type]++; else typeCounts['extend']++; });
             if(principlesChartInstance) principlesChartInstance.destroy();
             principlesChartInstance = new Chart(ctx1, { type: 'doughnut', data: { labels: ['提問', '延伸', '改進', '反駁', '整合'], datasets: [{ data: Object.values(typeCounts), backgroundColor: ['#3b82f6', '#eab308', '#22c55e', '#ef4444', '#a855f7'] }] }, options: { responsive: true, maintainAspectRatio: false } });
 
@@ -1099,17 +1129,17 @@
             activeNav.classList.remove('text-slate-400');
 
             if (viewName === 'quality') setTimeout(() => { 
-                initDeepLens(); 
-                initStreamChart(); 
-                initQualityNewMetrics(); // Updated trigger
+                 initDeepLens(); 
+                 initStreamChart(); 
+                 initQualityNewMetrics(); // Updated trigger
             }, 100);
             else if (viewName === 'topics') setTimeout(() => { 
-                initConceptNetwork(); 
-                initLexicalChart(); 
-                initPromisingnessChart(); 
-                initEvolutionTimeline(); 
-                initTopicContentAnalysis(); 
-            }, 100);
+                 initConceptNetwork(); 
+                 initLexicalChart(); 
+                 initPromisingnessChart(); 
+                 initEvolutionTimeline(); 
+                 initTopicContentAnalysis(); 
+             }, 100);
             else if (viewName === 'academic') setTimeout(() => { initAcademicAnalysis(); }, 100);
             else if (viewName === 'overview') setTimeout(() => { initOverview(globalRawDB); }, 100);
             else if (viewName === 'students') {
@@ -1131,25 +1161,25 @@
             const dbStatus = document.getElementById('db-status-text');
             const aiStatus = document.getElementById('ai-status-indicator');
             const hasKey = localStorage.getItem('kb_ai_key') || localStorage.getItem('gemini_api_key');
-            if (aiStatus) aiStatus.innerText = hasKey ? "Ready" : "No Key";
+            if (aiStatus) aiStatus.innerText = hasKey ? "Ready" : "AI Simulated";
 
-            const checkCloudData = () => {
+            const checkData = () => {
                 const db = getRealData();
                 if (db && db.nodes && db.nodes.length > 0) {
-                    console.log("Teacher Analytics: Cloud Data Synced!");
-                    dbStatus.innerText = "Cloud Online";
+                    console.log("Teacher Analytics: Data Loaded!");
+                    dbStatus.innerText = "Local Ready";
                     dbStatus.className = "text-green-400 font-bold";
                     renderStudentSidebar(db);
                     initOverview(db);
                     switchView('overview');
                 } else {
-                    console.log("Teacher Analytics: Waiting for cloud...");
-                    dbStatus.innerText = "Syncing...";
+                    console.log("Teacher Analytics: Waiting for data...");
+                    dbStatus.innerText = "Loading...";
                     dbStatus.className = "text-yellow-400 font-bold";
-                    setTimeout(checkCloudData, 1000);
+                    setTimeout(checkData, 1000);
                 }
             };
-            checkCloudData();
+            checkData();
         };
 
         // --- Chart Helper Functions ---
@@ -1170,15 +1200,15 @@
         
         let conceptNetworkInstance = null;
         function initConceptNetwork() { 
-            const container = document.getElementById('concept-network-container'); 
-            if(conceptNetworkInstance) { conceptNetworkInstance.destroy(); conceptNetworkInstance = null; }
+             const container = document.getElementById('concept-network-container'); 
+             if(conceptNetworkInstance) { conceptNetworkInstance.destroy(); conceptNetworkInstance = null; }
             const stopWords = ['的','是','在','有','和','了','與','就','也','但','我','你','他','我們','嗎','吧','個','這','那','不','人','都','很','？','！','。','，','：','...','嗎','呢','啊'];
             const replyCounts = {};
             globalAllNotes.forEach(n => replyCounts[n.id] = 0);
             globalAllNotes.forEach(n => { if (n.parentId && replyCounts[n.parentId] !== undefined) replyCounts[n.parentId]++; });
             const getNoteHeat = (n) => { let s = 1; if (n.type === 'riseabove') s = 4; else if (n.type === 'question') s = 3; else if (n.type === 'improve') s = 2; return s + ((replyCounts[n.id]||0) * 0.8); };
             const keywordMap = {}; 
-            globalAllNotes.forEach(n => {
+             globalAllNotes.forEach(n => {
                 const tokens = (n.title + " " + n.content).toLowerCase().split(/[\s,，.。:：!?！？"”'’()（）]+/);
                 const unique = new Set();
                 tokens.forEach(t => { if (t.length > 1 && !stopWords.includes(t) && isNaN(t)) unique.add(t); });
@@ -1219,12 +1249,12 @@
         }
 
         function initLexicalChart() { 
-            const ctx = document.getElementById('lexicalChart').getContext('2d'); 
-            if (lexicalChartInstance) lexicalChartInstance.destroy(); 
-            const count = globalAllNotes.length;
+             const ctx = document.getElementById('lexicalChart').getContext('2d'); 
+             if (lexicalChartInstance) lexicalChartInstance.destroy(); 
+             const count = globalAllNotes.length;
             const dataPoints = [Math.floor(count * 0.1), Math.floor(count * 0.4), Math.floor(count * 0.7), count];
             lexicalChartInstance = new Chart(ctx, { type: 'line', data: { labels: ['Week 1', 'Week 2', 'Week 3', 'Current'], datasets: [{ label: '關鍵字彙累積', data: dataPoints, borderColor: '#8b5cf6', backgroundColor: 'rgba(139, 92, 246, 0.1)', fill: true, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false } }); 
-        }
+         }
 
         function initPromisingnessChart() {
             const container = document.getElementById('promisingness-container');
@@ -1290,8 +1320,8 @@
 
         let streamChart;
         function initStreamChart() { 
-            const ctx = document.getElementById('streamChart').getContext('2d'); if (streamChart) streamChart.destroy(); 
-            if (globalAllNotes.length === 0) return;
+             const ctx = document.getElementById('streamChart').getContext('2d'); if (streamChart) streamChart.destroy(); 
+             if (globalAllNotes.length === 0) return;
             const sortedNotes = [...globalAllNotes].sort((a, b) => a.dateTime - b.dateTime); if(sortedNotes.length === 0) return;
             const startDate = sortedNotes[0].dateTime; const endDate = sortedNotes[sortedNotes.length - 1].dateTime; const timeSpan = endDate - startDate; const isDaily = timeSpan < (1000 * 60 * 60 * 24 * 14); const interval = isDaily ? (1000 * 60 * 60 * 24) : (1000 * 60 * 60 * 24 * 7);
             const buckets = []; let currentStart = startDate;
@@ -1310,19 +1340,19 @@
                 });
             });
             streamChart = new Chart(ctx, { 
-                data: { 
-                    labels: labels, 
-                    datasets: [
+                 data: { 
+                     labels: labels, 
+                     datasets: [
                         { type: 'line', label: '整合', data: buckets.map(b => b.counts.riseabove), backgroundColor: 'rgba(168, 85, 247, 0.5)', fill: true, tension: 0.5, pointRadius: 0 },
                         { type: 'line', label: '深化', data: buckets.map(b => b.counts.improve), backgroundColor: 'rgba(34, 197, 94, 0.5)', fill: true, tension: 0.5, pointRadius: 0 },
                         { type: 'line', label: '延伸', data: buckets.map(b => b.counts.extend), backgroundColor: 'rgba(59, 130, 246, 0.5)', fill: true, tension: 0.5, pointRadius: 0 },
                         { type: 'line', label: '提問', data: buckets.map(b => b.counts.question), backgroundColor: 'rgba(239, 68, 68, 0.5)', fill: true, tension: 0.5, pointRadius: 0 },
                         { type: 'scatter', label: '關鍵發言', data: scatterPoints, backgroundColor: 'white', borderColor: '#475569', borderWidth: 2, pointRadius: 6 }
                     ] 
-                }, 
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { stacked: true, beginAtZero: true } }, onClick: (e, activeEls) => { if (activeEls.length > 0) { const ds = streamChart.data.datasets[activeEls[0].datasetIndex]; if(ds.type === 'scatter') { const noteId = ds.data[activeEls[0].index].noteId; if(noteId) viewNote(noteId); } } } } 
-            }); 
-        }
+                 }, 
+                 options: { responsive: true, maintainAspectRatio: false, scales: { y: { stacked: true, beginAtZero: true } }, onClick: (e, activeEls) => { if (activeEls.length > 0) { const ds = streamChart.data.datasets[activeEls[0].datasetIndex]; if(ds.type === 'scatter') { const noteId = ds.data[activeEls[0].index].noteId; if(noteId) viewNote(noteId); } } } } 
+             }); 
+         }
 
         let impactScatterChart, scaffoldProfileChart;
         function initAcademicAnalysis() {
@@ -1530,7 +1560,7 @@
                 const d = parseFloat(globalClassStats.density);
                 const desc = d < 0.2 ? '（偏低，需加強互動）' : (d > 0.5 ? '（良好，社群緊密）' : '（尚可）');
                 dynamicStatus = dynamicStatus.replace('{val}', d).replace('{status}', desc);
-            } else if (key === 'rise_above' && globalClassStats.raRate) {
+            } else if (key === 'rise_above' && globalClassStats.raRate !== undefined) {
                 dynamicStatus = dynamicStatus.replace('{val}', globalClassStats.raRate).replace('{status}', globalClassStats.raRate > 10 ? '表現優異！' : '仍有進步空間。');
             } else if (key === 'total_notes') {
                 dynamicStatus = dynamicStatus.replace('{val}', globalClassStats.totalNotes).replace('{status}', '持續累積中');
@@ -1540,6 +1570,8 @@
                 const g = globalClassStats.gini || 0;
                 const desc = g < 0.3 ? '分配相當平均。' : '發言權集中於少數人。';
                 dynamicStatus = dynamicStatus.replace('{val}', g).replace('{status}', desc);
+            } else if (key === 'thread_depth') {
+                dynamicStatus = dynamicStatus.replace('{val}', globalClassStats.threadDepth || 0);
             } else {
                 dynamicStatus = "請參考儀表板上的即時數據圖表。";
             }
@@ -1569,7 +1601,7 @@
                     </div>
                 </div>
             `;
-            document.getElementById('modal-title').innerHTML = `<i class="fas fa-chart-line text-blue-500 mr-2"></i> ${content.title}`;
+            document.getElementById('modal-title').innerHTML = `<i class="fas fa-chart-line text-blue-500 mr-2"></i> ${content.title || '指標參考'}`;
             modal.classList.add('open');
         }
 
@@ -1577,12 +1609,12 @@
             document.querySelectorAll('.modal-overlay').forEach(el => el.classList.remove('open'));
         }
 
-        async function triggerTopicSummaryAI() {
-             const resultDiv = document.getElementById('topic-ai-summary-result');
-             resultDiv.classList.remove('hidden');
-             resultDiv.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>AI 正在閱讀並總結本主題...';
-             setTimeout(() => {
-                 resultDiv.innerHTML = '<strong><i class="fas fa-robot mr-1"></i> AI 摘要：</strong><br>本主題討論圍繞核心概念展開，學生們積極提出了多種假設。雖然互動密度尚可，但建議引導學生針對「爭議點」進行更深入的辯證，以促進知識昇華。';
+        async function triggerTopicSummaryAI() { 
+             const resultDiv = document.getElementById('topic-ai-summary-result'); 
+             resultDiv.classList.remove('hidden'); 
+             resultDiv.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>AI 正在閱讀並總結本主題...'; 
+             setTimeout(() => { 
+                 resultDiv.innerHTML = '<strong><i class="fas fa-robot mr-1"></i> AI 摘要：</strong><br>本主題討論圍繞核心概念展開，學生們積極提出了多種假設。雖然互動密度尚可，但建議引導學生針對「爭議點」進行更深入的辯證，以促進知識昇華。'; 
              }, 2000);
         }
 
