@@ -3,35 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的知識羅盤 | My KB Journey v3.11 Timeline-Fixed</title>
+    <title>我的知識羅盤 | My KB Journey</title>
     
-    <!-- 🔥 1. 引入 Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-
+    <!-- Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
-    <!-- Markdown for AI -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
-        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f3f4f6; padding-top: 28px; /* Space for fixed status bar */ }
-        .card { background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); padding: 1.5rem; }
-        .kb-badge { font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 9999px; font-weight: 600; }
+        
+        body { 
+            font-family: 'Noto Sans TC', sans-serif; 
+            background-color: #f3f4f6; 
+            padding-top: 28px; /* Space for fixed status bar */ 
+        }
+        .card { 
+            background: white; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); 
+            padding: 1.5rem; 
+        }
+        .kb-badge { 
+            font-size: 0.75rem; 
+            padding: 0.25rem 0.5rem; 
+            border-radius: 9999px; 
+            font-weight: 600; 
+        }
         
         /* 想法演化軌跡的連線樣式 */
         .evolution-line {
             position: absolute;
             left: 20px;
             top: 40px;
-            bottom: -24px; /* Slightly longer to connect better */
+            bottom: -24px;
             width: 2px;
             background-color: #e5e7eb;
             z-index: 0;
         }
-        /* Hide line for the last item */
         .evolution-item:last-child .evolution-line { display: none; }
         
         /* 社群推動力的漣漪動畫效果 */
@@ -49,19 +60,22 @@
             50% { transform: scale(1.1); }
         }
         .node-pulse { animation: pulse-node 2s infinite ease-in-out; }
-
+        
         /* 簡單的淡入動畫 */
         .fade-in { animation: fadeIn 0.5s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        
         /* 說明文字區塊樣式 */
         .insight-box {
             background-color: #f8fafc;
             border-left: 3px solid #cbd5e1;
             padding: 0.75rem;
             margin-top: 1rem;
-            font-size: 0.75rem; /* text-xs */
-            color: #64748b; /* text-slate-500 */
+            font-size: 0.75rem;
+            color: #64748b;
             line-height: 1.4;
         }
         .insight-title {
@@ -72,8 +86,8 @@
             align-items: center;
         }
         .insight-title i { margin-right: 0.25rem; }
-
-        /* Modal Styles - Mobile Optimized */
+        
+        /* Modal Styles */
         .modal {
             display: none; 
             position: fixed; 
@@ -82,23 +96,23 @@
             top: 0;
             width: 100%; 
             height: 100%; 
-            overflow: auto; /* Enable scroll if needed */
+            overflow: auto; 
             background-color: rgba(0,0,0,0.5); 
             backdrop-filter: blur(2px);
             align-items: center;
             justify-content: center;
-            padding: 1rem; /* Add padding for mobile */
+            padding: 1rem;
         }
         .modal-content {
             background-color: #fefefe;
             margin: auto;
             padding: 0;
             border-radius: 12px;
-            width: 100%; /* Full width on mobile */
+            width: 100%;
             max-width: 500px;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
             animation: modalFadeIn 0.3s;
-            max-height: 90vh; /* Max height for mobile */
+            max-height: 90vh;
             display: flex;
             flex-direction: column;
         }
@@ -115,18 +129,18 @@
             background-color: #f9fafb;
             border-top-left-radius: 12px;
             border-top-right-radius: 12px;
-            flex-shrink: 0; /* Header stays fixed */
+            flex-shrink: 0;
         }
         .modal-body {
             padding: 1.5rem;
-            overflow-y: auto; /* Scrollable body */
+            overflow-y: auto;
         }
         .close {
             color: #aaa;
             font-size: 28px;
             font-weight: bold;
             cursor: pointer;
-            padding: 0 0.5rem; /* Bigger touch target */
+            padding: 0 0.5rem;
         }
         .close:hover,
         .close:focus {
@@ -134,13 +148,14 @@
             text-decoration: none;
             cursor: pointer;
         }
+        
         /* Ref Button Style */
         .ref-btn {
-            color: #9ca3af; /* text-gray-400 */
-            background-color: #f3f4f6; /* bg-gray-100 */
+            color: #9ca3af;
+            background-color: #f3f4f6;
             padding: 0.25rem 0.5rem;
             border-radius: 9999px;
-            font-size: 0.75rem; /* text-xs */
+            font-size: 0.75rem;
             display: inline-flex;
             align-items: center;
             transition: all 0.2s;
@@ -148,54 +163,47 @@
             cursor: pointer;
         }
         .ref-btn:hover {
-            color: #4f46e5; /* text-indigo-600 */
-            background-color: #e0e7ff; /* bg-indigo-50 */
+            color: #4f46e5;
+            background-color: #e0e7ff;
         }
-        /* Dark mode compatible ref button for Community Impact card */
-        .ref-btn-dark {
-            color: #94a3b8; /* text-slate-400 */
-            background-color: rgba(255,255,255,0.1);
-        }
-        .ref-btn-dark:hover {
-            color: white;
-            background-color: rgba(255,255,255,0.2);
-        }
-        
-        /* New: Tiny Ref Button for Role Cards */
-        .ref-btn-mini {
-             position: absolute;
-             top: 4px;
-             right: 4px;
-             font-size: 0.65rem;
-             padding: 2px 6px;
-             color: #cbd5e1;
-             background: transparent;
-             cursor: pointer;
+        .ref-btn-mini { 
+            position: absolute; 
+            top: 4px; 
+            right: 4px; 
+            font-size: 0.65rem; 
+            padding: 2px 6px; 
+            color: #cbd5e1; 
+            background: transparent; 
+            cursor: pointer;
         }
         .ref-btn-mini:hover {
             color: #6366f1;
             background: #f1f5f9;
         }
-
-        /* Legend Dot */
-        .legend-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+        
+        .legend-dot { 
+            width: 8px; 
+            height: 8px; 
+            border-radius: 50%; 
+            display: inline-block; 
+            margin-right: 4px; 
+        }
     </style>
 </head>
 <body class="text-gray-800">
 
-    <!-- 🔥 [MODIFIED] Top Status Bar: Fixed Position to guarantee visibility -->
+    <!-- Top Status Bar -->
     <div class="fixed top-0 left-0 w-full bg-slate-900 text-white text-[10px] py-1 px-4 flex justify-between items-center z-[100] border-b border-slate-700 shadow-sm font-mono h-7">
         <div class="flex items-center gap-4">
-            <span class="flex items-center gap-1"><i class="fas fa-server text-green-500"></i> SYSTEM: <span class="text-green-400 font-bold">CLOUD CONNECTED</span></span>
-            <span class="hidden sm:flex items-center gap-1"><i class="fas fa-database text-yellow-500"></i> DB: <span id="db-status-text" class="text-yellow-400">CONNECTING...</span></span>
+            <span class="flex items-center gap-1"><i class="fas fa-server text-blue-500"></i> SYSTEM: <span class="text-blue-400 font-bold">LOCAL MODE</span></span>
+            <span class="hidden sm:flex items-center gap-1"><i class="fas fa-database text-blue-500"></i> DB: <span id="db-status-text" class="text-blue-400">LOCAL DATA</span></span>
         </div>
         <div class="flex items-center gap-1">
-            <i class="fas fa-robot text-slate-400"></i> AI Status: <span id="ai-status-indicator" class="text-slate-300">Checking...</span>
+            <i class="fas fa-robot text-slate-400"></i> AI Status: <span id="ai-status-indicator" class="text-green-400 font-bold">Ready</span>
         </div>
     </div>
 
     <!-- 頂部導航 -->
-    <!-- 🔥 [MODIFIED] Added top-7 to account for status bar -->
     <nav class="bg-indigo-600 text-white shadow-lg sticky top-7 z-50">
         <div class="container mx-auto px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-0">
             <div class="flex items-center space-x-3 w-full sm:w-auto justify-center sm:justify-start">
@@ -207,12 +215,12 @@
             </div>
             <div class="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto justify-center sm:justify-end overflow-x-auto pb-1 sm:pb-0">
                 <div class="flex items-center gap-2 mr-2">
-                    <a href="index.html" class="nav-btn bg-indigo-700 hover:bg-indigo-500 px-2 sm:px-3 py-1.5 rounded text-xs font-bold transition flex items-center gap-1 border border-indigo-500 whitespace-nowrap">
+                    <button class="nav-btn bg-indigo-700 hover:bg-indigo-500 px-2 sm:px-3 py-1.5 rounded text-xs font-bold transition flex items-center gap-1 border border-indigo-500 whitespace-nowrap">
                         <i class="fas fa-home"></i> <span class="hidden sm:inline">首頁</span>
-                    </a>
-                    <a href="Knowledge Building Forum.html" class="nav-btn bg-indigo-700 hover:bg-indigo-500 px-2 sm:px-3 py-1.5 rounded text-xs font-bold transition flex items-center gap-1 border border-indigo-500 whitespace-nowrap">
+                    </button>
+                    <button class="nav-btn bg-indigo-700 hover:bg-indigo-500 px-2 sm:px-3 py-1.5 rounded text-xs font-bold transition flex items-center gap-1 border border-indigo-500 whitespace-nowrap">
                         <i class="fas fa-comments"></i> <span class="hidden sm:inline">論壇</span>
-                    </a>
+                    </button>
                     <button onclick="syncData()" id="sync-btn" class="nav-btn bg-emerald-600 hover:bg-emerald-500 px-2 sm:px-3 py-1.5 rounded text-xs font-bold transition flex items-center gap-1 border border-emerald-500 whitespace-nowrap">
                         <i class="fas fa-sync-alt"></i> <span class="hidden sm:inline">刷新</span>
                     </button>
@@ -221,7 +229,7 @@
                     <span class="block font-bold" id="user-name">訪客</span>
                     <span class="text-xs text-indigo-200">學習者</span>
                 </div>
-                <img id="current-user-avatar" src="https://ui-avatars.com/api/?name=User&background=random" class="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-white flex-shrink-0">
+                <img id="current-user-avatar" src="https://ui-avatars.com/api/?name=User&background=random" class="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-white flex-shrink-0" alt="User Avatar">
                 
                 <!-- Student Switcher Container -->
                 <div id="nav-user-select-container"></div>
@@ -333,7 +341,7 @@
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-bold text-slate-700 flex items-center"><i class="fas fa-code-branch text-emerald-500 mr-2"></i> 最近的思考軌跡</h3>
                     <div class="flex items-center gap-2">
-                         <a href="Knowledge Building Forum.html" class="text-xs text-indigo-600 hover:underline font-bold mr-2 hidden sm:inline">去論壇回應 ></a>
+                         <span class="text-xs text-indigo-600 font-bold mr-2 hidden sm:inline">近期活動</span>
                          <button onclick="openRefModal('evolution')" class="ref-btn"><i class="fas fa-info-circle mr-1"></i> Ref.</button>
                     </div>
                 </div>
@@ -357,7 +365,6 @@
             </div>
 
             <div class="card border-l-4 border-indigo-500 bg-indigo-50/50">
-                <!-- 🔥 AI Section Title & Button -->
                 <div class="flex justify-between items-center mb-3">
                     <h3 class="font-bold text-indigo-900 flex items-center"><i class="fas fa-robot text-indigo-600 mr-2"></i> 來自 AI 導師的建議</h3>
                     <div class="flex gap-2">
@@ -408,7 +415,7 @@
                 </div>
             </div>
 
-            <!-- 🔥🔥 Ego Network: Fixed Layout -->
+            <!-- Ego Network -->
             <div class="card relative overflow-hidden h-[400px] flex flex-col">
                 <div class="flex justify-between items-center mb-2 flex-shrink-0">
                     <h2 class="text-lg font-bold flex items-center text-slate-800"><i class="fas fa-project-diagram text-indigo-500 mr-2"></i>知識網絡位置：自我與社群互動圈</h2>
@@ -425,7 +432,7 @@
             </div>
         </section>
 
-        <!-- New: Advanced KB Indicators -->
+        <!-- Advanced KB Indicators -->
         <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div class="card">
                  <div class="flex justify-between items-center mb-4">
@@ -510,31 +517,31 @@
     </div>
 
     <script>
-    // 🔥 2. Firebase Initialization (Cloud Core)
-    const firebaseConfig = {
-        apiKey: "AIzaSyDPjtxtf656JHVVlj1o4cLwSylo1jDBFAc",
-        authDomain: "kb-platform-1.firebaseapp.com",
-        databaseURL: "https://kb-platform-1-default-rtdb.firebaseio.com",
-        projectId: "kb-platform-1",
-        storageBucket: "kb-platform-1.firebasestorage.app",
-        messagingSenderId: "230026226847",
-        appId: "1:230026226847:web:49e6f09ddfc3de0ef046aa"
+    // Local Mock Data
+    const mockData = {
+        userList: {
+            "u1": { id: "u1", name: "王小明", role: "student" },
+            "u2": { id: "u2", name: "李大華", role: "student" },
+            "u3": { id: "u3", name: "林美玲", role: "student" }
+        },
+        nodes: [
+            { id: "n1", author: "u1", type: "question", title: "光合作用的條件？", content: "植物一定需要陽光才能生長嗎？有沒有例外呢？", date: "2023-10-01T08:00:00Z", topicId: "t1" },
+            { id: "n2", author: "u2", type: "extend", title: "Re: 光合作用的條件", content: "除了陽光，我覺得還需要水分和二氧化碳。", date: "2023-10-01T09:30:00Z", parentId: "n1", topicId: "t1" },
+            { id: "n3", author: "u1", type: "improve", title: "補充條件", content: "查了資料發現，葉綠體也是必不可少的關鍵！", date: "2023-10-01T10:15:00Z", parentId: "n2", topicId: "t1" },
+            { id: "n4", author: "u3", type: "question", title: "深海植物怎麼辦？", content: "深海完全沒有陽光，那邊的海藻是怎麼存活的？", date: "2023-10-02T08:20:00Z", parentId: "n1", topicId: "t1" },
+            { id: "n5", author: "u2", type: "counter", title: "Re: 深海植物", content: "深海可能沒有真正的『植物』，而是依賴化學合成的細菌？", date: "2023-10-02T14:00:00Z", parentId: "n4", topicId: "t1" },
+            { id: "n6", author: "u1", type: "riseabove", title: "總結：植物與生物能量來源", content: "綜合大家的討論：大部分植物依賴光合作用（陽光、水、二氧化碳、葉綠體）。但在極端環境（如深海無光區），生物圈可能依賴熱泉口的化學合成機制，這突破了我們對『植物生存』的既有認知。", date: "2023-10-03T10:00:00Z", parentId: "n5", topicId: "t1" }
+        ]
     };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const DB_COLLECTION = 'kb_platform';
-    const DB_DOC = 'class_data';
-    const SETTINGS_DOC = db.collection('kb_platform').doc('settings');
 
-    // --- Global State ---
+    // Global State
     let currentUserId = '';
-    let globalData = {}; // Store raw Firebase Data
+    let globalData = {}; 
     let radarChartInstance = null;
     let currentUserStats = null; 
-    let aiKey = "";
-    let egoNetworkInstance = null; // Vis network instance
+    let egoNetworkInstance = null; 
 
-    // --- Ref Data Database ---
+    // Ref Data Database
     const refData = {
         'interaction_circle': {
             title: '自我與社群互動圈 (Ego Network)',
@@ -606,11 +613,6 @@
             theory: '追蹤學生從使用「日常語言」轉向精確的「學術術語」，反映了概念理解的深化與專業化過程 (Metadiscourse)。',
             cite: 'Resendes, M., et al. (2015). Group-level formative feedback and metadiscourse.'
         },
-        'network': {
-            title: '網絡位置 (Network Position)',
-            theory: '你在社群網絡中的位置（如核心、橋梁、邊緣）。Broker (橋梁) 能連結不同的小團體，促進跨領域的知識流動，是社群知識擴散的關鍵。',
-            cite: 'Wasserman, S., & Faust, K. (1994). Social network analysis.'
-        },
         'diversity': {
             title: '觀點多樣性 (Idea Diversity)',
             theory: '根據 KB 原則，觀點多樣性是知識進步的必要條件。此指標衡量學生參與不同主題討論的廣度。',
@@ -623,7 +625,7 @@
         }
     };
 
-    // --- Modal Functions ---
+    // Modal Functions
     function openRefModal(key) {
         const data = refData[key] || { title: '分析項目', theory: '資料載入中...', cite: '' };
         const modal = document.getElementById('refModal');
@@ -637,7 +639,6 @@
         const s = currentUserStats;
 
         if (s) {
-            // Simplified logic for brevity, keeping existing structure
             if (key === 'initiator') {
                 statusText = `開創力強度：<strong>${s.roleMetrics.initiator}% (Top ${Math.max(1, 100-s.roleMetrics.initiator)}%)</strong>`;
                 insightText = s.roleMetrics.initiator > 70 ? "你非常善於開啟新的討論話題，是社群的好奇心引擎！" : "試著多發表一些「新問題」或「新想法」來提升此指標。";
@@ -669,7 +670,6 @@
 
         document.getElementById('modalStatus').innerHTML = statusText;
         document.getElementById('modalInsight').innerText = insightText;
-        
         modal.style.display = "flex";
     }
 
@@ -679,64 +679,27 @@
         }
     }
 
-    // --- Core Cloud Logic ---
+    // Core App Logic (Local Version)
     function initApp() {
-        // 1. Get AI Key - Hybrid Strategy
-        const localKey = localStorage.getItem('kb_ai_key') || localStorage.getItem('gemini_api_key');
-        const aiStatus = document.getElementById('ai-status-indicator');
+        const dbStatus = document.getElementById('db-status-text');
         
-        if (localKey) {
-            aiKey = localKey;
-            aiStatus.innerText = "Ready (Local)";
-            aiStatus.className = "text-green-400 font-bold";
+        // Load Local Mock Data
+        globalData = mockData;
+        dbStatus.innerText = "LOCAL DATA ONLINE";
+        dbStatus.className = "text-blue-400 font-bold";
+        
+        if (!document.getElementById('student-selector')) {
+            initUserSwitcher();
+        } else if (currentUserId) {
+            switchUser(currentUserId);
         }
-
-        // Try Cloud Sync for Key
-        SETTINGS_DOC.get().then(doc => {
-            if(doc.exists && doc.data().gemini_api_key) {
-                aiKey = doc.data().gemini_api_key;
-                // Sync back to local
-                localStorage.setItem('kb_ai_key', aiKey);
-                
-                aiStatus.innerText = "Ready"; // Cloud confirmed
-                aiStatus.className = "text-green-400 font-bold";
-            } else if (!localKey) {
-                aiStatus.innerText = "No Key";
-                aiStatus.className = "text-red-400 font-bold";
-            }
-        }).catch(err => {
-            console.warn("Cloud key fetch failed", err);
-            if (!localKey) {
-                aiStatus.innerText = "Offline";
-                aiStatus.className = "text-yellow-400 font-bold";
-            }
-        });
-
-        // 2. Listen to Class Data
-        db.collection(DB_COLLECTION).doc(DB_DOC).onSnapshot((doc) => {
-            const dbStatus = document.getElementById('db-status-text');
-            if (doc.exists) {
-                globalData = doc.data();
-                dbStatus.innerText = "FIREBASE ONLINE";
-                dbStatus.className = "text-green-400 font-bold";
-                
-                if (!document.getElementById('student-selector')) {
-                    initUserSwitcher();
-                } else if (currentUserId) {
-                    switchUser(currentUserId);
-                }
-            } else {
-                dbStatus.innerText = "NO DATA";
-                dbStatus.className = "text-red-400 font-bold";
-            }
-        });
     }
 
     function initUserSwitcher() {
         const container = document.getElementById('nav-user-select-container');
         if (!container) return;
         container.innerHTML = ''; 
-        
+
         const select = document.createElement('select');
         select.className = "bg-indigo-700 text-white text-xs border border-indigo-500 rounded px-2 py-1 outline-none";
         select.id = "student-selector";
@@ -758,14 +721,6 @@
         container.appendChild(select);
 
         let targetId = students.length > 0 ? students[0].id : null;
-        const localSession = localStorage.getItem('kb_local_session');
-        if (localSession) {
-            try {
-                const s = JSON.parse(localSession);
-                const u = students.find(st => st.id === globalData.userList[s.currentUserKey]?.id);
-                if (u) targetId = u.id;
-            } catch(e) {}
-        }
         
         if (targetId) {
             select.value = targetId;
@@ -812,7 +767,7 @@
         const tempStats = { scaffoldCounts, linksCount, totalNotes: myNotes.length };
         const roleMetrics = calculateRoleMetrics(tempStats);
 
-        // 🔥 [FIXED] Robust Date Sort Logic (Handles mixed Timestamp/String formats)
+        // Date Sort Logic (Handles mixed Timestamp/String formats)
         const sortedNotes = myNotes.sort((a,b) => {
             const da = new Date(a.date).getTime();
             const db = new Date(b.date).getTime();
@@ -836,7 +791,7 @@
             repliedCount: repliedCount,
             linksCount: linksCount,
             scaffoldCounts: scaffoldCounts,
-            recentNotes: sortedNotes.slice(0, 20), // 🔥 [MODIFIED] Increased slice from 5 to 20
+            recentNotes: sortedNotes.slice(0, 20), 
             roleMetrics: roleMetrics,
             uniqueTopicsCount: uniqueTopics,
             avgDepth: avgDepth,
@@ -856,7 +811,7 @@
 
         // Analyze
         const stats = analyzeStudentData(userId);
-        currentUserStats = stats; // Save for Ref Modal
+        currentUserStats = stats;
 
         // Update Dynamic Role UI
         document.getElementById('role-initiator-val').innerText = `${stats.roleMetrics.initiator}%`;
@@ -893,12 +848,6 @@
         document.getElementById('avg-depth-val').innerText = stats.avgDepth.toFixed(1);
         document.getElementById('avg-depth-bar').style.width = `${Math.min(stats.avgDepth * 20, 100)}%`;
 
-        // Update Network Role
-        let netRole = "周邊參與者 (Peripheral)";
-        if (metrics.builder > 70 || stats.repliedCount > 5) netRole = "核心人物 (Central)";
-        else if (metrics.builder > 40 || stats.linksCount > 3) netRole = "橋樑者 (Broker)";
-        // document.getElementById('network-role-label').innerText = netRole; // Removed in this view
-
         // Render Numbers
         animateValue("card-created-val", 0, stats.totalNotes, 800);
         animateValue("card-read-val", 0, Math.floor(stats.totalNotes * 5.5 + 10), 800);
@@ -916,11 +865,11 @@
         const s_impact = Math.min((stats.repliedCount * 15) + 10, 100);
         renderRadarChart([s_init, s_build, s_read, s_vocab, s_impact], user.name);
         
-        // 🔥 Render Ego Network
+        // Render Ego Network
         renderEgoNetwork(userId);
         
-        // 🔥 [ADDED] Determine Epistemic Fingerprint
-        let fingerprintType = "社群連結型"; // Default
+        // Determine Epistemic Fingerprint
+        let fingerprintType = "社群連結型"; 
         let fingerprintDesc = "你善於在社群中建立連結，促進對話流動。";
         
         if (metrics.synthesizer > 60 || stats.scaffoldCounts.riseabove > 1) {
@@ -939,11 +888,11 @@
             ${fingerprintDesc}
         `;
 
-        // Reset AI
+        // Reset AI Feedback
         document.getElementById('ai-feedback').innerHTML = '<p class="text-slate-400 italic">點擊下方按鈕以獲取 AI 建議...</p>';
     }
 
-    // New: Render Ego Network
+    // Render Ego Network
     function renderEgoNetwork(userId) {
         const container = document.getElementById('ego-network-container');
         if(!container) return;
@@ -953,11 +902,11 @@
         
         // Colors mapping
         const typeColors = { 
-            question: '#3b82f6', // Blue
-            extend: '#eab308',   // Yellow
-            improve: '#22c55e',  // Green
-            counter: '#ef4444',  // Red
-            riseabove: '#a855f7' // Purple
+            question: '#3b82f6', 
+            extend: '#eab308',   
+            improve: '#22c55e',  
+            counter: '#ef4444',  
+            riseabove: '#a855f7' 
         };
 
         const interactants = new Set();
@@ -1005,7 +954,7 @@
         if (visNodes.length <= 1) {
             container.innerHTML = '<div class="flex h-full items-center justify-center text-slate-400 text-xs">尚無互動紀錄</div>';
         } else {
-            container.innerHTML = ''; // Clear empty msg
+            container.innerHTML = ''; 
             egoNetworkInstance = new vis.Network(container, data, options);
         }
     }
@@ -1067,7 +1016,6 @@
         });
     }
 
-    // New: View Note Detail
     function viewNoteDetail(noteId) {
         const note = globalData.nodes.find(n => n.id === noteId);
         if(!note) return;
@@ -1118,61 +1066,43 @@
                 }]
             },
             options: { 
-                responsive: true, 
-                maintainAspectRatio: false, 
-                scales: { r: { ticks: { display: false }, suggestedMin: 0, suggestedMax: 100, pointLabels: { font: { size: 11 } } } }, 
-                plugins: { legend: { position: 'bottom' } } 
-            }
+                 responsive: true, 
+                 maintainAspectRatio: false, 
+                 scales: { r: { ticks: { display: false }, suggestedMin: 0, suggestedMax: 100, pointLabels: { font: { size: 11 } } } }, 
+                 plugins: { legend: { position: 'bottom' } } 
+             }
         });
     }
 
-    // 🔥 [AI LOGIC] - Updated to accept mode
+    // AI Logic Integration
     async function triggerAIAnalysis(mode = 'advice') {
         const btnSelector = mode === 'advice' ? 
             'button[onclick="triggerAIAnalysis(\'advice\')"]' : 
             'button[onclick="triggerAIAnalysis(\'portfolio\')"]';
-        const btn = document.querySelector(btnSelector) || document.querySelector('button[onclick="triggerAIAnalysis()"]'); // Fallback
+        const btn = document.querySelector(btnSelector) || document.querySelector('button[onclick="triggerAIAnalysis()"]');
         const feedbackContainer = document.getElementById('ai-feedback');
-        
-        // Robust Key Check
-        if (!aiKey) { 
-             aiKey = localStorage.getItem('kb_ai_key');
-        }
-        
-        if (!aiKey) {
-            // Prompt user
-            const input = prompt("系統尚未偵測到 API Key，請輸入您的 Gemini API Key 以繼續：");
-            if (input && input.trim() !== "") {
-                aiKey = input.trim();
-                localStorage.setItem('kb_ai_key', aiKey); // Save locally for session
-                document.getElementById('ai-status-indicator').innerText = "Ready (Manual)";
-            } else {
-                alert("未輸入 API Key，無法啟動 AI 導師。");
-                return;
-            }
-        }
         
         const originalText = btn.innerHTML;
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 思考中...';
         
-        // Prepare Context
         const s = currentUserStats;
         let promptText = "";
         
-        // 🔥 [OPTIMIZED] Pruned context for speed
         const contextSummary = `角色:${document.getElementById('role-title').innerText}。發文:${s.totalNotes},回覆:${s.linksCount},被引:${s.repliedCount}。鷹架:${s.scaffoldCounts.question}/${s.scaffoldCounts.extend}/${s.scaffoldCounts.improve}/${s.scaffoldCounts.riseabove}。`;
 
         if (mode === 'advice') {
             promptText = `根據數據：${contextSummary} 給予該學生3點具體的知識建構改進建議 (繁體中文，語氣鼓勵，限150字內)。`;
         } else {
-            // Portfolio Mode
             promptText = `根據數據：${contextSummary} 為學生撰寫一份「學習歷程檔案」的自我反思草稿 (Reflection Draft)。第一人稱，學術且真誠，強調「觀點演變」與「貢獻」。限200字內。`;
         }
 
         try {
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${aiKey}`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
+            // Environment handles the correct API key injection
+            const apiKey = ""; 
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
             });
             const data = await response.json();
@@ -1187,7 +1117,7 @@
         btn.innerHTML = originalText;
     }
 
-    // --- Init ---
+    // Initialization
     window.onload = function() {
         // Global Keydown Listener for ESC
         window.addEventListener('keydown', function(event) {
