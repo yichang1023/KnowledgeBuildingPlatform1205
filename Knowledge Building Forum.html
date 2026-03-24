@@ -5,13 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>知識建構協作平台 (KB Platform) - Mobile Optimized</title>
     
-    <!-- 🔥 [ADDED] 1. 引入 Firebase SDK (雲端通訊模組) -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <script>
         tailwind.config = {
             theme: {
@@ -71,7 +68,9 @@
         
         .node-card {
             transition: box-shadow 0.2s, transform 0.2s; 
-            user-select: none; touch-action: none; -webkit-user-select: none;
+            user-select: none; 
+            touch-action: none; 
+            -webkit-user-select: none;
             will-change: left, top; 
         }
         .node-card:hover {
@@ -109,7 +108,12 @@
             color: #475569;
             border: 1px solid #e2e8f0;
         }
-        path.connection { fill: none; stroke-width: 2; transition: stroke 0.3s; pointer-events: none; }
+        path.connection { 
+            fill: none; 
+            stroke-width: 2; 
+            transition: stroke 0.3s; 
+            pointer-events: none; 
+        }
         
         #selection-box {
             position: fixed;
@@ -158,7 +162,6 @@
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 h-full w-full flex flex-col font-sans">
-
     <!-- Top Navbar -->
     <nav class="h-14 md:h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-6 z-50 shadow-sm relative shrink-0">
         <div class="flex items-center gap-3 cursor-pointer" onclick="window.location.href='index.html'">
@@ -276,8 +279,8 @@
     <div id="modal-node" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] hidden flex items-end md:items-center justify-center sm:p-4">
         <div class="bg-white rounded-t-xl sm:rounded-xl shadow-2xl w-full max-w-2xl p-4 sm:p-6 relative max-h-[90vh] overflow-y-auto flex flex-col mb-safe md:mb-0">
             <div class="flex justify-between items-center mb-4">
-                 <h3 class="text-lg md:text-xl font-bold">貢獻想法</h3>
-                 <button onclick="window.ui.closeModal('modal-node')" class="text-slate-400 hover:text-slate-600 p-2"><i class="fa-solid fa-xmark text-xl"></i></button>
+                <h3 class="text-lg md:text-xl font-bold">貢獻想法</h3>
+                <button onclick="window.ui.closeModal('modal-node')" class="text-slate-400 hover:text-slate-600 p-2"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             
             <div class="flex-1 overflow-y-auto custom-scroll pb-2">
@@ -290,7 +293,13 @@
                     <textarea id="node-content" rows="4" class="w-full px-4 py-3 border border-slate-300 rounded-lg outline-none text-base" placeholder="輸入詳細內容..."></textarea>
                 </div>
                 <!-- AI Box moved inside scrollable area for mobile -->
-                <div id="ai-suggestion-box" class="hidden mt-2 bg-blue-50 border border-blue-100 text-blue-800 p-3 rounded-lg text-sm flex items-start gap-3 shadow-sm"><i class="fa-solid fa-lightbulb text-yellow-500 mt-1 shrink-0"></i><div><span class="font-bold block text-xs uppercase text-blue-400 mb-1">AI 建議</span><p class="text-xs md:text-sm">試著用「我的理論是...因為...」來延伸？</p></div></div>
+                <div id="ai-suggestion-box" class="hidden mt-2 bg-blue-50 border border-blue-100 text-blue-800 p-3 rounded-lg text-sm flex items-start gap-3 shadow-sm">
+                    <i class="fa-solid fa-lightbulb text-yellow-500 mt-1 shrink-0"></i>
+                    <div>
+                        <span class="font-bold block text-xs uppercase text-blue-400 mb-1">AI 建議</span>
+                        <p class="text-xs md:text-sm">試著用「我的理論是...因為...」來延伸？</p>
+                    </div>
+                </div>
             </div>
             
             <div class="mt-4 flex justify-end shrink-0 pt-2 border-t border-slate-100">
@@ -307,7 +316,11 @@
                     <div id="detail-scaffold-icon" class="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-white text-lg"></div>
                     <div>
                         <div id="detail-scaffold-label" class="text-xs font-bold uppercase mb-0.5">TYPE</div>
-                        <div class="flex gap-2 text-[10px] md:text-xs text-slate-500"><span id="detail-author"></span><span>•</span><span id="detail-date"></span></div>
+                        <div class="flex gap-2 text-[10px] md:text-xs text-slate-500">
+                            <span id="detail-author"></span>
+                            <span>•</span>
+                            <span id="detail-date"></span>
+                        </div>
                     </div>
                 </div>
                 <button onclick="window.ui.closeModal('modal-detail')" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-200 text-slate-400"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -328,7 +341,10 @@
             <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500 text-xl"><i class="fa-solid fa-triangle-exclamation"></i></div>
             <h3 class="text-lg font-bold mb-2">確定要刪除嗎？</h3>
             <p class="text-slate-500 text-sm mb-6">將連同子節點一併刪除。</p>
-            <div class="flex justify-center gap-3"><button onclick="window.ui.closeModal('modal-confirm')" class="px-4 py-2 border rounded-lg w-full">取消</button><button id="btn-confirm-action" class="px-4 py-2 bg-red-600 text-white rounded-lg w-full">刪除</button></div>
+            <div class="flex justify-center gap-3">
+                <button onclick="window.ui.closeModal('modal-confirm')" class="px-4 py-2 border rounded-lg w-full">取消</button>
+                <button id="btn-confirm-action" class="px-4 py-2 bg-red-600 text-white rounded-lg w-full">刪除</button>
+            </div>
         </div>
     </div>
 
@@ -337,8 +353,17 @@
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6">
             <h3 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-user-plus text-indigo-600"></i> 新增使用者</h3>
             <div class="space-y-4">
-                <div><label class="block text-sm font-medium text-slate-700 mb-1">暱稱 (Nickname)</label><input type="text" id="new-user-name" placeholder="例如：小明" class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none"></div>
-                <div><label class="block text-sm font-medium text-slate-700 mb-1">角色</label><select id="new-user-role" class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none bg-white"><option value="student">協同研究員 (學生)</option><option value="teacher">首席研究員 (老師)</option></select></div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">暱稱 (Nickname)</label>
+                    <input type="text" id="new-user-name" placeholder="例如：小明" class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">角色</label>
+                    <select id="new-user-role" class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none bg-white">
+                        <option value="student">協同研究員 (學生)</option>
+                        <option value="teacher">首席研究員 (老師)</option>
+                    </select>
+                </div>
             </div>
             <div class="mt-6 flex justify-end gap-3">
                 <button onclick="window.ui.closeModal('modal-addUser')" class="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg">取消</button>
@@ -366,21 +391,6 @@
     <div id="toast-container" class="fixed bottom-20 md:bottom-10 right-4 md:right-6 z-[120] flex flex-col gap-2 pointer-events-none w-full max-w-[300px] md:w-auto items-end"></div>
 
     <script>
-        // 🔥 [ADDED] 2. Firebase Initialization
-        const firebaseConfig = {
-            apiKey: "AIzaSyDPjtxtf656JHVVlj1o4cLwSylo1jDBFAc",
-            authDomain: "kb-platform-1.firebaseapp.com",
-            databaseURL: "https://kb-platform-1-default-rtdb.firebaseio.com",
-            projectId: "kb-platform-1",
-            storageBucket: "kb-platform-1.firebasestorage.app",
-            messagingSenderId: "230026226847",
-            appId: "1:230026226847:web:49e6f09ddfc3de0ef046aa"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const DB_COLLECTION = 'kb_platform';
-        const DB_DOC = 'class_data';
-
         // --- 1. Global Constants ---
         window.ROLES = { LEAD: 'teacher', CO: 'student' };
         window.SCAFFOLDS = {
@@ -390,8 +400,16 @@
             counter: { id: 'counter', label: 'Counter', icon: 'fa-triangle-exclamation', color: 'bg-red-500', border: 'border-red-500', bgSoft: 'bg-red-50', text: 'text-red-700', desc: '提出不同的看法、反例或證據，試著挑戰現有的想法，激盪出更多可能。' },
             riseabove: { id: 'riseabove', label: 'Rise Above', icon: 'fa-rocket', color: 'bg-purple-500', border: 'border-purple-500', bgSoft: 'bg-purple-50', text: 'text-purple-700', desc: '整合大家分散的討論，歸納出一個更完整、層次更高的結論或新發現。' }
         };
-        window.TOPIC_CATEGORIES = { '科學': '🔬 科學', 'STEAM': '💡 STEAM', '專題課': '🎓 專題課', '電機電子': '📡 電機電子', 'AI': '🤖 AI', '語言學習': '📙 語言學習', '文學': '📖 文學', '社會議題': '☁️ 社會議題', '物理': '⚛️ 物理學', '動漫': '🎨 動漫', '程式': '💻 程式設計', '歷史': '📜 歷史', '哲學': '🤔 哲學', '藝術': '🎭 藝術', '其他': '📦 其他' };
+        
+        window.TOPIC_CATEGORIES = { 
+            '科學': '🔬 科學', 'STEAM': '💡 STEAM', '專題課': '🎓 專題課', '電機電子': '📡 電機電子', 
+            'AI': '🤖 AI', '語言學習': '📙 語言學習', '文學': '📖 文學', '社會議題': '☁️ 社會議題', 
+            '物理': '⚛️ 物理學', '動漫': '🎨 動漫', '程式': '💻 程式設計', '歷史': '📜 歷史', 
+            '哲學': '🤔 哲學', '藝術': '🎭 藝術', '其他': '📦 其他' 
+        };
+        
         window.STORAGE_KEY = 'kb_platform_v2_28_data'; 
+        
         window.CLUSTER_CENTERS = { 
             'A': {x: 250, y: 300, title: '核心問題探究區 (Core Question)', width: 600, height: 600}, 
             'B': {x: 1050, y: 300, title: '延伸變因討論區 (Variables)', width: 600, height: 600}, 
@@ -565,8 +583,13 @@
             // 🔥 [FIX] Initialize with seed user to prevent "null" errors before cloud load
             user: window.SEED_DATA.userList['teacher'], 
             userList: {...window.SEED_DATA.userList},
-            topics: [], nodes: [], trash: [], currentView: 'entrance', currentTopicId: null,
-            activeFilter: '全部', tempSelectedCategories: [], 
+            topics: [], 
+            nodes: [], 
+            trash: [], 
+            currentView: 'entrance', 
+            currentTopicId: null,
+            activeFilter: '全部', 
+            tempSelectedCategories: [], 
             editingTopicId: null, // Add editing state
             canvas: { 
                 scale: 1, offsetX: 0, offsetY: 0, 
@@ -583,7 +606,7 @@
             composer: { parentId: null, selectedScaffold: null }, profile: null
         };
         
-        // 🔥 [MODIFIED] 3. Data Manager Logic (Cloud Sync)
+        // 🔥 [MODIFIED] 3. Data Manager Logic (Local Storage Only)
         window.dataManager = {
             save: () => { 
                 const dataToSave = {
@@ -592,10 +615,10 @@
                     nodes: window.state.nodes,
                     trash: window.state.trash
                 };
-                db.collection(DB_COLLECTION).doc(DB_DOC).set(dataToSave)
-                  .then(() => { console.log("Cloud Saved"); })
-                  .catch((e) => { console.error("Save error:", e); });
                 
+                // 將資料儲存至瀏覽器本機儲存空間 (Local Storage)
+                localStorage.setItem(window.STORAGE_KEY, JSON.stringify(dataToSave));
+                  
                 // Save session state to local storage
                 window.dataManager.saveLocalSession();
             },
@@ -611,72 +634,67 @@
                 localStorage.setItem('kb_local_session', JSON.stringify(localState));
             },
             load: () => {
-                // 1. Listen to Cloud Data
-                db.collection(DB_COLLECTION).doc(DB_DOC).onSnapshot((doc) => {
-                    if (doc.exists) {
-                        const data = doc.data();
+                // 1. 從 Local Storage 讀取主要資料
+                const savedDataStr = localStorage.getItem(window.STORAGE_KEY);
+                
+                if (savedDataStr) {
+                    try {
+                        const data = JSON.parse(savedDataStr);
                         window.state.userList = data.userList || window.SEED_DATA.userList;
                         window.state.topics = data.topics || window.SEED_DATA.topics;
                         window.state.nodes = data.nodes || window.SEED_DATA.nodes;
                         window.state.trash = data.trash || [];
-                        
-                        // [FIX] Robust User Restoration
-                        // Always try to restore user from LocalStorage first, even if cloud updates
-                        const localSession = localStorage.getItem('kb_local_session');
-                        let userKey = 'teacher';
-                        if(localSession) {
-                            try {
-                                const parsed = JSON.parse(localSession);
-                                // Verify if the key still exists in the new userList
-                                if(window.state.userList[parsed.currentUserKey]) {
-                                    userKey = parsed.currentUserKey;
-                                }
-                            } catch(e){}
-                        }
-                        
-                        // Set User
-                        window.state.user = window.state.userList[userKey] || window.state.userList['teacher'];
-
-                        // Re-render current view
-                        if (window.state.currentView === 'entrance') window.ui.renderEntrance();
-                        else if (window.state.currentView === 'canvas') window.ui.renderCanvas();
-                        else if (window.state.currentView === 'profile') window.ui.renderProfile();
-                        window.ui.renderUserInfo();
-                        window.ui.renderUserMenu();
-                        window.app.updateTrashBadge();
-                    } else {
-                        // Init seed data if empty
+                    } catch (e) {
+                        console.error("Local storage parsing error, falling back to seed", e);
                         window.state.userList = JSON.parse(JSON.stringify(window.SEED_DATA.userList));
                         window.state.topics = JSON.parse(JSON.stringify(window.SEED_DATA.topics));
                         window.state.nodes = JSON.parse(JSON.stringify(window.SEED_DATA.nodes));
                         window.state.trash = [];
-                        window.state.user = window.state.userList['teacher'];
-                        window.dataManager.save();
                     }
-                });
+                } else {
+                    // 若無資料則初始化範例教材
+                    window.state.userList = JSON.parse(JSON.stringify(window.SEED_DATA.userList));
+                    window.state.topics = JSON.parse(JSON.stringify(window.SEED_DATA.topics));
+                    window.state.nodes = JSON.parse(JSON.stringify(window.SEED_DATA.nodes));
+                    window.state.trash = [];
+                    window.dataManager.save();
+                }
 
-                // 2. Load Local Session State (View/Topic)
+                // 2. Load Local Session State (User, View, Topic)
                 const localSession = localStorage.getItem('kb_local_session');
+                let userKey = 'teacher';
                 if (localSession) {
                     try {
                         const parsed = JSON.parse(localSession);
+                        if(window.state.userList[parsed.currentUserKey]) {
+                            userKey = parsed.currentUserKey;
+                        }
                         window.state.currentView = parsed.currentView || 'entrance';
                         window.state.currentTopicId = parsed.currentTopicId || null;
                     } catch(e) {}
                 }
+                
+                // Set User
+                window.state.user = window.state.userList[userKey] || window.state.userList['teacher'];
+
+                // Re-render current view
+                if (window.state.currentView === 'entrance') window.ui.renderEntrance();
+                else if (window.state.currentView === 'canvas') window.ui.renderCanvas();
+                else if (window.state.currentView === 'profile') window.ui.renderProfile();
+                window.ui.renderUserInfo();
+                window.ui.renderUserMenu();
+                window.app.updateTrashBadge();
             },
             reset: () => { 
-                if(confirm("確定重置所有資料？這將刪除雲端資料庫並載入最新的「知識建構範例教材」。")) {
+                if(confirm("確定重置所有資料？這將刪除所有本機資料並載入最新的「知識建構範例教材」。")) {
                     const seed = {
                         userList: window.SEED_DATA.userList,
                         topics: window.SEED_DATA.topics,
                         nodes: window.SEED_DATA.nodes,
                         trash: []
                     };
-                    db.collection(DB_COLLECTION).doc(DB_DOC).set(seed)
-                    .then(() => { 
-                        window.location.reload(); 
-                    });
+                    localStorage.setItem(window.STORAGE_KEY, JSON.stringify(seed));
+                    window.location.reload(); 
                 }
             }
         };
@@ -696,23 +714,38 @@
             return html;
         };
 
-        window.app.setFilter = (category) => { window.state.activeFilter = category; window.ui.renderEntrance(); };
+        window.app.setFilter = (category) => { 
+            window.state.activeFilter = category; 
+            window.ui.renderEntrance(); 
+        };
+        
         window.app.initCategorySelector = () => { };
+        
         window.app.renderCategorySelector = () => {
-            const container = document.getElementById('topic-category-selector'); if(!container) return;
+            const container = document.getElementById('topic-category-selector'); 
+            if(!container) return;
             container.innerHTML = Object.keys(window.TOPIC_CATEGORIES).map(key => {
                 const isSelected = window.state.tempSelectedCategories.includes(key);
                 return `<span onclick="window.app.toggleTempCategory('${key}')" class="category-tag px-3 py-1 rounded-full text-xs font-bold border ${isSelected ? 'selected' : 'bg-white text-slate-500 border-slate-200'}">${window.TOPIC_CATEGORIES[key]}</span>`;
             }).join('');
         };
+        
         window.app.toggleTempCategory = (key) => {
-            if (window.state.tempSelectedCategories.includes(key)) { window.state.tempSelectedCategories = window.state.tempSelectedCategories.filter(c => c !== key); } else { window.state.tempSelectedCategories.push(key); }
+            if (window.state.tempSelectedCategories.includes(key)) { 
+                window.state.tempSelectedCategories = window.state.tempSelectedCategories.filter(c => c !== key); 
+            } else { 
+                window.state.tempSelectedCategories.push(key); 
+            }
             window.app.renderCategorySelector();
         };
 
         // Routing & User
         window.app.router = (view) => {
-            if (view === 'canvas' && !window.state.currentTopicId) { window.ui.showToast('請先從主題入口選擇一個探究主題', 'error'); window.app.router('entrance'); return; }
+            if (view === 'canvas' && !window.state.currentTopicId) { 
+                window.ui.showToast('請先從主題入口選擇一個探究主題', 'error'); 
+                window.app.router('entrance'); 
+                return; 
+            }
             window.state.currentView = view;
             if(view === 'entrance') { window.state.currentTopicId = null; }
             window.dataManager.saveLocalSession(); // Save view change
@@ -729,19 +762,45 @@
         };
 
         window.app.toggleUserMenu = () => document.getElementById('user-menu').classList.toggle('hidden');
-        window.app.openAddUserModal = () => { document.getElementById('modal-addUser').classList.remove('hidden'); document.getElementById('user-menu').classList.add('hidden'); document.getElementById('new-user-name').focus(); };
-        window.app.createNewUser = () => {
-            const nameInput = document.getElementById('new-user-name'); const roleInput = document.getElementById('new-user-role');
-            const name = nameInput.value.trim(); if (!name) return window.ui.showToast('暱稱不能為空', 'error');
-            const newKey = `user${Date.now()}`; const newId = `u${Date.now()}`;
-            window.state.userList[newKey] = { id: newId, name, role: roleInput.value, avatar: `https://api.dicebear.com/9.x/notionists/svg?seed=${name}` };
-            window.dataManager.save(); window.ui.closeModal('modal-addUser'); window.ui.renderUserMenu(); window.ui.showToast('新增成功'); window.app.switchUser(newKey);
+        
+        window.app.openAddUserModal = () => { 
+            document.getElementById('modal-addUser').classList.remove('hidden'); 
+            document.getElementById('user-menu').classList.add('hidden'); 
+            document.getElementById('new-user-name').focus(); 
         };
+        
+        window.app.createNewUser = () => {
+            const nameInput = document.getElementById('new-user-name'); 
+            const roleInput = document.getElementById('new-user-role');
+            const name = nameInput.value.trim(); 
+            if (!name) return window.ui.showToast('暱稱不能為空', 'error');
+            const newKey = `user${Date.now()}`; 
+            const newId = `u${Date.now()}`;
+            window.state.userList[newKey] = { 
+                id: newId, 
+                name, 
+                role: roleInput.value, 
+                avatar: `https://api.dicebear.com/9.x/notionists/svg?seed=${name}` 
+            };
+            window.dataManager.save(); 
+            window.ui.closeModal('modal-addUser'); 
+            window.ui.renderUserMenu(); 
+            window.ui.showToast('新增成功'); 
+            window.app.switchUser(newKey);
+        };
+        
         window.app.deleteUser = (key) => {
             if (window.state.userList[key].id === window.state.user.id) return window.ui.showToast('無法刪除當前登入的使用者', 'error');
             if (Object.keys(window.state.userList).length <= 1) return window.ui.showToast('無法刪除最後一位使用者', 'error');
-            window.ui.confirm('確定刪除使用者？', '此操作無法復原。', () => { delete window.state.userList[key]; window.dataManager.save(); window.ui.renderUserMenu(); window.ui.showToast('使用者已刪除'); window.ui.closeModal('modal-confirm'); });
+            window.ui.confirm('確定刪除使用者？', '此操作無法復原。', () => { 
+                delete window.state.userList[key]; 
+                window.dataManager.save(); 
+                window.ui.renderUserMenu(); 
+                window.ui.showToast('使用者已刪除'); 
+                window.ui.closeModal('modal-confirm'); 
+            });
         };
+        
         window.app.switchUser = (userKey) => {
             if (!window.state.userList[userKey]) return;
             window.state.user = window.state.userList[userKey]; 
@@ -749,13 +808,14 @@
             
             // [FIX] Force immediate local save before cloud sync
             window.dataManager.saveLocalSession();
-            
             window.dataManager.save(); // Also sync to cloud
             window.ui.renderUserInfo(); 
             window.ui.renderUserMenu(); 
             window.ui.showToast(`已切換：${window.state.user.name}`); 
             document.getElementById('user-menu').classList.add('hidden');
-            if(window.state.currentView === 'canvas') window.ui.renderCanvas(); else if(window.state.currentView === 'profile') window.ui.renderProfile(); else window.ui.renderEntrance();
+            if(window.state.currentView === 'canvas') window.ui.renderCanvas(); 
+            else if(window.state.currentView === 'profile') window.ui.renderProfile(); 
+            else window.ui.renderEntrance();
         };
 
         // Data Manipulation
@@ -820,48 +880,126 @@
         };
 
         window.app.updateTrashBadge = () => {
-            const badge = document.getElementById('trash-count-badge'); if(!badge) return;
+            const badge = document.getElementById('trash-count-badge'); 
+            if(!badge) return;
             const count = window.state.trash.length;
-            if(count > 0) { badge.innerText = count; badge.classList.remove('hidden'); } else { badge.classList.add('hidden'); }
+            if(count > 0) { 
+                badge.innerText = count; 
+                badge.classList.remove('hidden'); 
+            } else { 
+                badge.classList.add('hidden'); 
+            }
         };
-        window.app.openTrash = () => { window.ui.renderTrashList(); document.getElementById('modal-trash').classList.remove('hidden'); document.getElementById('user-menu').classList.add('hidden'); };
+        
+        window.app.openTrash = () => { 
+            window.ui.renderTrashList(); 
+            document.getElementById('modal-trash').classList.remove('hidden'); 
+            document.getElementById('user-menu').classList.add('hidden'); 
+        };
+        
         window.app.restoreTrashItem = (trashId) => {
-            const itemIndex = window.state.trash.findIndex(t => t.id === trashId); if(itemIndex === -1) return;
+            const itemIndex = window.state.trash.findIndex(t => t.id === trashId); 
+            if(itemIndex === -1) return;
             const item = window.state.trash[itemIndex];
-            if (item.type === 'topic') { window.state.topics.unshift(item.data); window.state.nodes.push(...item.relatedNodes); } else { window.state.nodes.push(...item.data); }
-            window.state.trash.splice(itemIndex, 1); window.dataManager.save(); window.ui.renderTrashList(); window.app.updateTrashBadge();
-            if(window.state.currentView === 'entrance') window.ui.renderEntrance(); if(window.state.currentView === 'canvas') window.ui.renderCanvas();
+            if (item.type === 'topic') { 
+                window.state.topics.unshift(item.data); 
+                window.state.nodes.push(...item.relatedNodes); 
+            } else { 
+                window.state.nodes.push(...item.data); 
+            }
+            window.state.trash.splice(itemIndex, 1); 
+            window.dataManager.save(); 
+            window.ui.renderTrashList(); 
+            window.app.updateTrashBadge();
+            if(window.state.currentView === 'entrance') window.ui.renderEntrance(); 
+            if(window.state.currentView === 'canvas') window.ui.renderCanvas();
             window.ui.showToast('已還原項目', 'success');
         };
+        
         window.app.deleteTrashItem = (trashId) => {
-            window.ui.confirm('確定永久刪除？', '此動作無法復原！', () => { window.state.trash = window.state.trash.filter(t => t.id !== trashId); window.dataManager.save(); window.ui.renderTrashList(); window.app.updateTrashBadge(); window.ui.closeModal('modal-confirm'); window.ui.showToast('已永久刪除'); });
-        };
-        window.app.emptyTrash = () => {
-            if(window.state.trash.length === 0) return;
-            window.ui.confirm('確定清空回收桶？', '所有項目將永久消失！', () => { window.state.trash = []; window.dataManager.save(); window.ui.renderTrashList(); window.app.updateTrashBadge(); window.ui.closeModal('modal-confirm'); window.ui.showToast('回收桶已清空'); });
-        };
-        window.app.deleteTopic = (id) => {
-            window.ui.confirm('確定要刪除嗎？', '主題將被移至資源回收桶。', () => {
-                const topic = window.state.topics.find(t => t.id === id); const associatedNodes = window.state.nodes.filter(n => n.topicId === id);
-                window.state.trash.unshift({ id: `trash-${Date.now()}`, type: 'topic', data: topic, relatedNodes: associatedNodes, deletedAt: Date.now(), deletedBy: window.state.user.id });
-                window.state.topics = window.state.topics.filter(t => t.id !== id); window.state.nodes = window.state.nodes.filter(n => n.topicId !== id);
-                window.dataManager.save(); window.app.updateTrashBadge(); window.ui.closeModal('modal-confirm'); window.ui.renderEntrance(); window.ui.showToast('主題已移至回收桶');
+            window.ui.confirm('確定永久刪除？', '此動作無法復原！', () => { 
+                window.state.trash = window.state.trash.filter(t => t.id !== trashId); 
+                window.dataManager.save(); 
+                window.ui.renderTrashList(); 
+                window.app.updateTrashBadge(); 
+                window.ui.closeModal('modal-confirm'); 
+                window.ui.showToast('已永久刪除'); 
             });
         };
+        
+        window.app.emptyTrash = () => {
+            if(window.state.trash.length === 0) return;
+            window.ui.confirm('確定清空回收桶？', '所有項目將永久消失！', () => { 
+                window.state.trash = []; 
+                window.dataManager.save(); 
+                window.ui.renderTrashList(); 
+                window.app.updateTrashBadge(); 
+                window.ui.closeModal('modal-confirm'); 
+                window.ui.showToast('回收桶已清空'); 
+            });
+        };
+        
+        window.app.deleteTopic = (id) => {
+            window.ui.confirm('確定要刪除嗎？', '主題將被移至資源回收桶。', () => {
+                const topic = window.state.topics.find(t => t.id === id); 
+                const associatedNodes = window.state.nodes.filter(n => n.topicId === id);
+                window.state.trash.unshift({ 
+                    id: `trash-${Date.now()}`, 
+                    type: 'topic', 
+                    data: topic, 
+                    relatedNodes: associatedNodes, 
+                    deletedAt: Date.now(), 
+                    deletedBy: window.state.user.id 
+                });
+                window.state.topics = window.state.topics.filter(t => t.id !== id); 
+                window.state.nodes = window.state.nodes.filter(n => n.topicId !== id);
+                window.dataManager.save(); 
+                window.app.updateTrashBadge(); 
+                window.ui.closeModal('modal-confirm'); 
+                window.ui.renderEntrance(); 
+                window.ui.showToast('主題已移至回收桶');
+            });
+        };
+        
         window.app.deleteNode = (id) => {
             window.ui.confirm('確定要刪除嗎？', '想法將被移至資源回收桶。', () => {
                 const toDel = [];
-                const findChildren = (pid) => { window.state.nodes.filter(n => n.parentId === pid).forEach(c => { toDel.push(c); findChildren(c.id); }); };
+                const findChildren = (pid) => { 
+                    window.state.nodes.filter(n => n.parentId === pid).forEach(c => { 
+                        toDel.push(c); 
+                        findChildren(c.id); 
+                    }); 
+                };
                 const target = window.state.nodes.find(n => n.id === id);
-                if(target) { toDel.push(target); findChildren(id); }
-                window.state.trash.unshift({ id: `trash-${Date.now()}`, type: 'node', data: toDel, deletedAt: Date.now(), deletedBy: window.state.user.id });
+                if(target) { 
+                    toDel.push(target); 
+                    findChildren(id); 
+                }
+                window.state.trash.unshift({ 
+                    id: `trash-${Date.now()}`, 
+                    type: 'node', 
+                    data: toDel, 
+                    deletedAt: Date.now(), 
+                    deletedBy: window.state.user.id 
+                });
                 const idsToDelete = toDel.map(n => n.id);
                 window.state.nodes = window.state.nodes.filter(n => !idsToDelete.includes(n.id));
-                window.dataManager.save(); window.app.updateTrashBadge(); window.ui.closeModal('modal-confirm'); window.ui.renderCanvas(); window.ui.showToast('想法已移至回收桶');
+                window.dataManager.save(); 
+                window.app.updateTrashBadge(); 
+                window.ui.closeModal('modal-confirm'); 
+                window.ui.renderCanvas(); 
+                window.ui.showToast('想法已移至回收桶');
             });
         };
-        window.app.enterTopic = (id) => { window.state.currentTopicId = id; window.state.canvas.scale=1; window.state.canvas.offsetX=0; window.state.canvas.offsetY=0; window.app.router('canvas'); };
         
+        window.app.enterTopic = (id) => { 
+            window.state.currentTopicId = id; 
+            window.state.canvas.scale=1; 
+            window.state.canvas.offsetX=0; 
+            window.state.canvas.offsetY=0; 
+            window.app.router('canvas'); 
+        };
+
         // Node Composition
         window.app.openComposer = (pid) => {
             window.state.composer.parentId = pid;
@@ -874,12 +1012,18 @@
             if(descEl) { descEl.innerHTML = ''; descEl.className = 'hidden'; }
             document.getElementById('modal-node').classList.remove('hidden');
         };
+        
         window.app.selectScaffold = (t) => {
             window.state.composer.selectedScaffold = t;
             Object.values(window.SCAFFOLDS).forEach(s => {
                 const btn = document.getElementById(`btn-scaffold-${s.id}`);
-                if(s.id === t) { btn.classList.remove('opacity-60', 'border-slate-100'); btn.classList.add('opacity-100', window.SCAFFOLDS[t].border, window.SCAFFOLDS[t].bgSoft); }
-                else { btn.classList.add('opacity-60', 'border-slate-100'); btn.classList.remove('opacity-100', window.SCAFFOLDS[s.id].border, window.SCAFFOLDS[s.id].bgSoft); }
+                if(s.id === t) { 
+                    btn.classList.remove('opacity-60', 'border-slate-100'); 
+                    btn.classList.add('opacity-100', window.SCAFFOLDS[t].border, window.SCAFFOLDS[t].bgSoft); 
+                } else { 
+                    btn.classList.add('opacity-60', 'border-slate-100'); 
+                    btn.classList.remove('opacity-100', window.SCAFFOLDS[s.id].border, window.SCAFFOLDS[s.id].bgSoft); 
+                }
             });
             const s = window.SCAFFOLDS[t];
             const descEl = document.getElementById('scaffold-desc');
@@ -889,11 +1033,14 @@
                 descEl.classList.remove('hidden');
             }
         };
+        
         window.app.checkAIIntervention = (e) => {
             const len = e.target.value.length;
             const box = document.getElementById('ai-suggestion-box');
-            if(len > 5 && len < 20) box.classList.remove('hidden'); else box.classList.add('hidden');
+            if(len > 5 && len < 20) box.classList.remove('hidden'); 
+            else box.classList.add('hidden');
         };
+        
         window.app.submitNode = () => {
             if(!window.state.composer.selectedScaffold) return window.ui.showToast('請選擇意圖', 'error');
             const title = document.getElementById('node-title').value; // Get Title
@@ -905,7 +1052,8 @@
             let nx, ny;
             if(pid) {
                 const p = window.state.nodes.find(n => n.id === pid);
-                nx = p.x + (Math.random()*100 - 50); ny = p.y + 200;
+                nx = p.x + (Math.random()*100 - 50); 
+                ny = p.y + 200;
             } else {
                 const wrap = document.getElementById('canvas-wrapper');
                 nx = -window.state.canvas.offsetX + wrap.clientWidth/2 - 140;
@@ -927,11 +1075,16 @@
                 cluster: randomCluster, 
                 promisingness: randomProm 
             });
-            window.dataManager.save(); window.ui.closeModal('modal-node'); window.ui.renderCanvas();
+            window.dataManager.save(); 
+            window.ui.closeModal('modal-node'); 
+            window.ui.renderCanvas();
         };
+        
         window.app.openNodeDetail = (id) => {
-            const n = window.state.nodes.find(x => x.id === id); if(!n) return;
-            const s = window.SCAFFOLDS[n.type]; const u = Object.values(window.state.userList).find(u => u.id === n.author);
+            const n = window.state.nodes.find(x => x.id === id); 
+            if(!n) return;
+            const s = window.SCAFFOLDS[n.type]; 
+            const u = Object.values(window.state.userList).find(u => u.id === n.author);
             const icon = document.getElementById('detail-scaffold-icon');
             icon.className = `w-8 h-8 md:w-10 md:h-10 rounded-full flex justify-center items-center text-white text-lg ${s.color}`;
             icon.innerHTML = `<i class="fa-solid ${s.icon}"></i>`;
@@ -941,20 +1094,30 @@
             document.getElementById('detail-author').innerText = u ? u.name : '?';
             document.getElementById('detail-date').innerText = new Date(n.date).toLocaleString();
             document.getElementById('detail-content').innerText = n.content;
-            document.getElementById('btn-detail-reply').onclick = () => { window.ui.closeModal('modal-detail'); setTimeout(() => window.app.openComposer(n.id), 200); };
+            document.getElementById('btn-detail-reply').onclick = () => { 
+                window.ui.closeModal('modal-detail'); 
+                setTimeout(() => window.app.openComposer(n.id), 200); 
+            };
             document.getElementById('modal-detail').classList.remove('hidden');
         };
 
         // AI Mock
         window.app.generateAIProfile = () => {
-            const btn = document.getElementById('btn-gen-profile'); const loading = document.getElementById('ai-loading');
-            btn.classList.add('hidden'); loading.classList.remove('hidden'); document.getElementById('ai-profile-result').classList.add('hidden');
+            const btn = document.getElementById('btn-gen-profile'); 
+            const loading = document.getElementById('ai-loading');
+            btn.classList.add('hidden'); 
+            loading.classList.remove('hidden'); 
+            document.getElementById('ai-profile-result').classList.add('hidden');
+            
             setTimeout(() => {
                 const myNodes = window.state.nodes.filter(n => n.author === window.state.user.id);
                 const profileData = window.app.mockGeminiAnalysis(window.state.user, myNodes);
-                window.state.profile = profileData; window.ui.renderProfileContent(profileData); loading.classList.add('hidden');
+                window.state.profile = profileData; 
+                window.ui.renderProfileContent(profileData); 
+                loading.classList.add('hidden');
             }, 1500);
         };
+        
         window.app.mockGeminiAnalysis = (user, nodes) => {
             const counts = { question:0, extend:0, improve:0, counter:0, riseabove:0 };
             nodes.forEach(n => { if(counts[n.type] !== undefined) counts[n.type]++; });
@@ -966,15 +1129,27 @@
             else if (maxType === 'counter') { role = "建設性批判者 (Constructive Critic)"; desc = "你勇於挑戰既有假設..."; icon = "fa-gavel"; } 
             else if (maxType === 'improve') { role = "理論優化者 (Theory Improver)"; desc = "你持續致力於改善他人的想法..."; icon = "fa-wrench"; } 
             else { role = "積極連結者 (Active Connector)"; desc = "你積極串聯各種想法..."; icon = "fa-link"; }
+            
             let trajectoryHTML = "";
-            if (nodes.length === 0) { trajectoryHTML = "<p class='text-slate-500 italic'>尚無足夠資料來分析演化軌跡，快去貢獻想法吧！</p>"; } else {
+            if (nodes.length === 0) { 
+                trajectoryHTML = "<p class='text-slate-500 italic'>尚無足夠資料來分析演化軌跡，快去貢獻想法吧！</p>"; 
+            } else {
                 const sorted = [...nodes].sort((a,b) => b.date - a.date).slice(0, 3);
-                trajectoryHTML = sorted.map((n, i) => { const s = window.SCAFFOLDS[n.type]; return `<div class="flex items-start gap-3 relative pb-4 last:pb-0">${i !== sorted.length -1 ? '<div class="absolute left-[14px] top-8 bottom-0 w-0.5 bg-slate-200"></div>' : ''}<div class="w-7 h-7 rounded-full ${s.color} text-white flex items-center justify-center shrink-0 z-10 text-xs"><i class="fa-solid ${s.icon}"></i></div><div class="flex-1"><div class="flex items-center gap-2 mb-1"><span class="text-xs font-bold px-2 py-0.5 rounded-full ${s.bgSoft} ${s.text}">${s.label}</span><span class="text-[10px] text-slate-400">${new Date(n.date).toLocaleDateString()}</span></div><p class="text-slate-900 font-bold text-xs mb-1">${n.title || ''}</p><p class="text-slate-700 text-sm bg-slate-50 p-2 rounded border border-slate-100">${n.content}</p></div></div>`; }).join('');
+                trajectoryHTML = sorted.map((n, i) => { 
+                    const s = window.SCAFFOLDS[n.type]; 
+                    return `<div class="flex items-start gap-3 relative pb-4 last:pb-0">${i !== sorted.length -1 ? '<div class="absolute left-[14px] top-8 bottom-0 w-0.5 bg-slate-200"></div>' : ''}<div class="w-7 h-7 rounded-full ${s.color} text-white flex items-center justify-center shrink-0 z-10 text-xs"><i class="fa-solid ${s.icon}"></i></div><div class="flex-1"><div class="flex items-center gap-2 mb-1"><span class="text-xs font-bold px-2 py-0.5 rounded-full ${s.bgSoft} ${s.text}">${s.label}</span><span class="text-[10px] text-slate-400">${new Date(n.date).toLocaleDateString()}</span></div><p class="text-slate-900 font-bold text-xs mb-1">${n.title || ''}</p><p class="text-slate-700 text-sm bg-slate-50 p-2 rounded border border-slate-100">${n.content}</p></div></div>`; 
+                }).join('');
             }
+            
             const replyCount = nodes.filter(n => n.parentId).length; 
             const sparkedCount = Math.floor(total * 0.8); 
             const communityHTML = `<div class="grid grid-cols-2 gap-4 mb-3"><div class="bg-blue-50 p-3 rounded-lg text-center"><div class="text-2xl font-bold text-blue-600">${replyCount}</div><div class="text-xs text-blue-800">承接他人想法</div></div><div class="bg-indigo-50 p-3 rounded-lg text-center"><div class="text-2xl font-bold text-indigo-600">${sparkedCount}</div><div class="text-xs text-indigo-800">激發後續討論</div></div></div><p class="text-sm text-slate-600 leading-relaxed">${replyCount > sparkedCount ? "你傾向於<span class='font-bold text-blue-600'>站在巨人的肩膀上</span>，善於消化並延續他人的觀點..." : "你的想法具有<span class='font-bold text-indigo-600'>高度啟發性</span>，經常成為社群熱烈討論的核心..."}</p>`;
-            const statsHTML = Object.entries(counts).map(([k, v]) => { const pct = (v / total) * 100; const s = window.SCAFFOLDS[k]; return `<div class="mb-2"><div class="flex justify-between text-xs mb-1"><span class="font-medium text-slate-600 flex items-center gap-1"><i class="fa-solid ${s.icon} ${s.text}"></i> ${s.label}</span><span class="text-slate-400">${Math.round(pct)}%</span></div><div class="w-full bg-slate-100 rounded-full h-1.5"><div class="${s.color} h-1.5 rounded-full transition-all duration-1000" style="width: ${pct}%"></div></div></div>`; }).join('');
+            const statsHTML = Object.entries(counts).map(([k, v]) => { 
+                const pct = (v / total) * 100; 
+                const s = window.SCAFFOLDS[k]; 
+                return `<div class="mb-2"><div class="flex justify-between text-xs mb-1"><span class="font-medium text-slate-600 flex items-center gap-1"><i class="fa-solid ${s.icon} ${s.text}"></i> ${s.label}</span><span class="text-slate-400">${Math.round(pct)}%</span></div><div class="w-full bg-slate-100 rounded-full h-1.5"><div class="${s.color} h-1.5 rounded-full transition-all duration-1000" style="width: ${pct}%"></div></div></div>`; 
+            }).join('');
+            
             return { role, desc, icon, trajectoryHTML, communityHTML, statsHTML };
         };
 
@@ -1053,9 +1228,11 @@
                     const c = window.app.canvas.getCoords(e);
                     window.state.canvas.lastX = c.x; 
                     window.state.canvas.lastY = c.y;
-                    const w = document.getElementById('canvas-wrapper'); if(w) w.style.cursor = 'grabbing';
+                    const w = document.getElementById('canvas-wrapper'); 
+                    if(w) w.style.cursor = 'grabbing';
                     return;
                 }
+                
                 window.state.canvas.isSelecting = true;
                 const c = window.app.canvas.getCoords(e);
                 window.state.canvas.selectionStart = {x: c.x, y: c.y};
@@ -1112,7 +1289,8 @@
                         }
                     });
 
-                    window.state.canvas.lastX = c.x; window.state.canvas.lastY = c.y;
+                    window.state.canvas.lastX = c.x; 
+                    window.state.canvas.lastY = c.y;
                 } else if (window.state.canvas.isSelecting) {
                     window.state.canvas.selectionCurrent = {x: c.x, y: c.y};
                     const start = window.state.canvas.selectionStart;
@@ -1137,7 +1315,8 @@
                 if (window.state.canvas.isDragging) {
                     window.state.canvas.isDragging = false;
                     const cursor = window.state.canvas.isPanMode ? 'grab' : 'default'; 
-                    const w = document.getElementById('canvas-wrapper'); if(w) w.style.cursor = cursor;
+                    const w = document.getElementById('canvas-wrapper'); 
+                    if(w) w.style.cursor = cursor;
                 }
                 if (window.state.canvas.draggedNodeId) {
                     window.state.canvas.draggedNodeId = null;
@@ -1145,7 +1324,12 @@
                 if (window.state.canvas.isSelecting) {
                     const start = window.state.canvas.selectionStart;
                     const current = window.state.canvas.selectionCurrent;
-                    const selRect = { left: Math.min(start.x, current.x), top: Math.min(start.y, current.y), right: Math.max(start.x, current.x), bottom: Math.max(start.y, current.y) };
+                    const selRect = { 
+                        left: Math.min(start.x, current.x), 
+                        top: Math.min(start.y, current.y), 
+                        right: Math.max(start.x, current.x), 
+                        bottom: Math.max(start.y, current.y) 
+                    };
                     
                     // If box is tiny, just hide it and return (treat as click)
                     if (Math.abs(selRect.right - selRect.left) < 5 && Math.abs(selRect.bottom - selRect.top) < 5) {
@@ -1166,18 +1350,17 @@
                     });
                     
                     // Update Selection State
-                    newSelectedIds.forEach(id => { if (!window.state.selectedNodeIds.includes(id)) window.state.selectedNodeIds.push(id); });
+                    newSelectedIds.forEach(id => { 
+                        if (!window.state.selectedNodeIds.includes(id)) {
+                            window.state.selectedNodeIds.push(id); 
+                        }
+                    });
                     
                     // 🔥 [CRITICAL FIX] Visual Update Only (Direct DOM Manipulation)
-                    // Do NOT call renderCanvas() here as it destroys DOM and event listeners
-                    
-                    // 1. Remove highlight from all nodes first (if shift not pressed, handled in startDrag/mouseDown logic, but here we just ensure sync)
-                    // If we want to keep existing selection on shift click, we need to be careful.
-                    // But simpler approach for visual sync:
+                    // 1. Remove highlight from all nodes first
                     document.querySelectorAll('.node-card.selected-node').forEach(el => {
-                        // Check if it is still in selectedNodeIds
                         const id = el.id.replace('node-', '');
-                        if(!window.state.selectedNodeIds.includes(id)) {
+                        if(!window.state.selectedNodeIds.includes(id)) { 
                              el.classList.remove('selected-node');
                         }
                     });
@@ -1198,19 +1381,29 @@
                 window.state.canvas.scale = Math.min(Math.max(0.2, window.state.canvas.scale + d), 3);
                 window.app.canvas.applyTransform();
             },
-            zoom: (d) => { window.state.canvas.scale = Math.min(Math.max(0.2, window.state.canvas.scale + d), 3); window.app.canvas.applyTransform(); },
-            fitView: () => { window.state.canvas.scale = window.innerWidth < 768 ? 0.8 : 1; window.state.canvas.offsetX = 0; window.state.canvas.offsetY = 0; window.app.canvas.applyTransform(); },
+            zoom: (d) => { 
+                window.state.canvas.scale = Math.min(Math.max(0.2, window.state.canvas.scale + d), 3); 
+                window.app.canvas.applyTransform(); 
+            },
+            fitView: () => { 
+                window.state.canvas.scale = window.innerWidth < 768 ? 0.8 : 1; 
+                window.state.canvas.offsetX = 0; 
+                window.state.canvas.offsetY = 0; 
+                window.app.canvas.applyTransform(); 
+            },
             startDrag: (e, id) => {
                 window.state.canvas.draggedNodeId = id;
                 const c = window.app.canvas.getCoords(e);
-                window.state.canvas.lastX = c.x; window.state.canvas.lastY = c.y;
+                window.state.canvas.lastX = c.x; 
+                window.state.canvas.lastY = c.y;
+                
                 if (!window.state.selectedNodeIds.includes(id)) {
                     if (!e.shiftKey) window.state.selectedNodeIds = [];
                     window.state.selectedNodeIds.push(id);
                     
                     // 🔥 [OPTIMIZED FIX] Visual update only - NO RENDER CANVAS
                     document.querySelectorAll('.node-card').forEach(el => el.classList.remove('selected-node'));
-                    window.state.selectedNodeIds.forEach(i => {
+                    window.state.selectedNodeIds.forEach(i => { 
                          const el = document.getElementById(`node-${i}`);
                          if(el) el.classList.add('selected-node');
                     });
@@ -1258,7 +1451,10 @@
                 const startPositions = {};
                 const nodes = window.state.nodes.filter(n => n.topicId === window.state.currentTopicId);
                 nodes.forEach(n => { startPositions[n.id] = {x: n.x, y: n.y}; });
-                const duration = 800; const startTime = performance.now(); window.state.canvas.isAnimating = true;
+                const duration = 800; 
+                const startTime = performance.now(); 
+                window.state.canvas.isAnimating = true;
+                
                 const animate = (time) => {
                     const elapsed = time - startTime;
                     const progress = Math.min(elapsed / duration, 1);
@@ -1273,10 +1469,14 @@
                             if (el) { el.style.left = `${node.x}px`; el.style.top = `${node.y}px`; }
                         }
                     });
-                    if (progress < 1) { requestAnimationFrame(animate); } 
-                    else { 
-                        window.state.canvas.isAnimating = false; 
-                        targets.forEach(target => { const node = nodes.find(n => n.id === target.id); if(node) { node.x = target.x; node.y = target.y; } }); 
+                    if (progress < 1) { 
+                        requestAnimationFrame(animate); 
+                    } else { 
+                        window.state.canvas.isAnimating = false;
+                        targets.forEach(target => { 
+                            const node = nodes.find(n => n.id === target.id); 
+                            if(node) { node.x = target.x; node.y = target.y; } 
+                        });
                         window.ui.drawConnections(nodes); // Redraw lines at end
                     }
                 };
@@ -1286,6 +1486,7 @@
 
         // --- 5. UI Logic (Separated for safety) ---
         window.ui = {};
+        
         window.ui.init = () => {
             console.log("Initializing UI...");
             window.dataManager.load();
@@ -1293,14 +1494,21 @@
             window.app.initCategorySelector();
             window.ui.renderUserInfo();
             window.ui.renderUserMenu();
-            if (window.state.currentView === 'canvas' && window.state.currentTopicId && window.state.topics.find(t => t.id === window.state.currentTopicId)) { window.app.router('canvas'); }
-            else if (window.state.currentView === 'profile') { window.app.router('profile'); }
-            else { window.app.router('entrance'); }
+            
+            if (window.state.currentView === 'canvas' && window.state.currentTopicId && window.state.topics.find(t => t.id === window.state.currentTopicId)) { 
+                window.app.router('canvas'); 
+            } else if (window.state.currentView === 'profile') { 
+                window.app.router('profile'); 
+            } else { 
+                window.app.router('entrance'); 
+            }
             
             // Global Listeners for Canvas Interaction
             window.addEventListener('mouseup', window.app.canvas.handleEnd);
             window.addEventListener('touchend', window.app.canvas.handleEnd);
-            window.addEventListener('resize', () => { if(window.state.currentView === 'canvas') window.ui.renderCanvas(); });
+            window.addEventListener('resize', () => { 
+                if(window.state.currentView === 'canvas') window.ui.renderCanvas(); 
+            });
             
             // NEW: Escape key to close modals
             window.addEventListener('keydown', (e) => {
@@ -1342,6 +1550,7 @@
                 const deleteBtn = canDelete ? `<button onclick="event.stopPropagation(); window.app.deleteUser('${key}')" class="p-3 text-slate-400 hover:text-red-500 transition"><i class="fa-solid fa-trash"></i></button>` : `<div class="p-3 w-10"></div>`; 
                 return `<div class="flex items-center hover:bg-slate-50 border-b border-slate-50 last:border-0 group"><button onclick="window.app.switchUser('${key}')" class="flex-1 text-left px-4 py-3 text-sm flex items-center gap-2 ${isCurrentUser ? 'bg-indigo-50 text-indigo-700' : ''}"><span class="text-xl">${u.role === window.ROLES.LEAD ? '👨‍🏫' : '🧑‍🎓'}</span><div class="flex flex-col"><span class="font-medium">${u.name}</span><span class="text-[10px] text-slate-400">${u.role === window.ROLES.LEAD ? '首席' : '協同'}</span></div></button>${deleteBtn}</div>`;
             }).join('');
+            
             let resetOption = window.state.user.role === window.ROLES.LEAD ? `<div class="bg-slate-50 px-4 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider border-t mt-1">系統設定</div><button onclick="window.dataManager.reset()" class="w-full text-left px-4 py-3 hover:bg-red-50 text-sm flex items-center gap-2 text-red-600 font-medium"><span class="text-xl">⚠️</span> 重置系統資料</button>` : '';
             const menuEl = document.getElementById('user-menu');
             if(menuEl) menuEl.innerHTML = `<div class="bg-slate-50 px-4 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider">切換身份</div><div class="max-h-60 overflow-y-auto custom-scroll">${menuContent}</div><div class="bg-slate-50 px-4 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider border-t mt-1">人員管理</div><button onclick="window.app.openAddUserModal()" class="w-full text-left px-4 py-3 hover:bg-slate-50 text-sm flex items-center gap-2 text-indigo-600 font-medium"><span class="text-xl">➕</span> 新增協同研究員</button>${resetOption}`;
@@ -1350,7 +1559,10 @@
         window.ui.renderTrashList = () => { 
             const list = document.getElementById('trash-list');
             if (!list) return;
-            if (window.state.trash.length === 0) { list.innerHTML = `<div class="text-center py-10 text-slate-400"><i class="fa-regular fa-trash-can text-4xl mb-3 opacity-50"></i><p>回收桶是空的</p></div>`; return; }
+            if (window.state.trash.length === 0) { 
+                list.innerHTML = `<div class="text-center py-10 text-slate-400"><i class="fa-regular fa-trash-can text-4xl mb-3 opacity-50"></i><p>回收桶是空的</p></div>`; 
+                return; 
+            }
             list.innerHTML = window.state.trash.map(item => {
                 const isTopic = item.type === 'topic';
                 const icon = isTopic ? 'fa-folder' : (window.SCAFFOLDS[item.data[0]?.type]?.icon || 'fa-note-sticky');
@@ -1360,6 +1572,7 @@
                 return `<div class="flex items-center justify-between p-3 border border-slate-200 rounded-lg hover:bg-slate-50 transition"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full ${color} flex items-center justify-center shrink-0"><i class="fa-solid ${icon}"></i></div><div><div class="font-bold text-slate-800 text-sm">${name}</div><div class="text-xs text-slate-400">刪除於: ${date}</div></div></div><div class="flex gap-2"><button onclick="window.app.restoreTrashItem('${item.id}')" class="text-xs bg-green-50 text-green-600 px-3 py-1.5 rounded hover:bg-green-100 transition border border-green-200">還原</button><button onclick="window.app.deleteTrashItem('${item.id}')" class="text-xs bg-red-50 text-red-600 px-3 py-1.5 rounded hover:bg-red-100 transition border border-red-200">永久刪除</button></div></div>`;
             }).join('');
         };
+        
         window.ui.closeModal = (id) => { 
             document.getElementById(id).classList.add('hidden');
             if(id === 'modal-node') {
@@ -1369,7 +1582,9 @@
                 window.state.composer.parentId = null;
                 window.state.composer.selectedScaffold = null;
             }
-            if (id === 'modal-addUser') { document.getElementById('new-user-name').value = ''; }
+            if (id === 'modal-addUser') { 
+                document.getElementById('new-user-name').value = ''; 
+            }
             if (id === 'modal-topic') { 
                 window.state.tempSelectedCategories = []; 
                 window.state.editingTopicId = null;
@@ -1378,6 +1593,7 @@
                 document.getElementById('topic-desc').value = ''; 
             }
         };
+        
         window.ui.showToast = (msg, type = 'info') => { 
             const container = document.getElementById('toast-container');
             const el = document.createElement('div');
@@ -1386,14 +1602,19 @@
             el.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-check' : 'fa-info-circle'}"></i> ${msg}`;
             container.appendChild(el);
             requestAnimationFrame(() => el.classList.remove('translate-y-2', 'opacity-0'));
-            setTimeout(() => { el.classList.add('opacity-0', 'translate-x-full'); setTimeout(() => el.remove(), 300); }, 3000);
+            setTimeout(() => { 
+                el.classList.add('opacity-0', 'translate-x-full'); 
+                setTimeout(() => el.remove(), 300); 
+            }, 3000);
         };
+        
         window.ui.confirm = (title, desc, action) => { 
             document.querySelector('#modal-confirm h3').innerText = title;
             document.querySelector('#modal-confirm p').innerText = desc;
             document.getElementById('btn-confirm-action').onclick = action;
             document.getElementById('modal-confirm').classList.remove('hidden');
         };
+        
         window.ui.updateNav = (view) => { 
             document.querySelectorAll('.nav-btn, .mobile-nav-btn').forEach(btn => {
                 if(btn.dataset.nav === view) {
@@ -1405,26 +1626,65 @@
                 }
             });
         };
+        
         window.ui.renderEntrance = () => { 
             const container = document.getElementById('app-container');
             const visibleTopics = window.state.activeFilter === '全部' 
                 ? window.state.topics 
                 : window.state.topics.filter(t => t.categories && t.categories.includes(window.state.activeFilter));
-            
+                
             // Added pb-24 to ensure content clears mobile bottom nav
-            container.innerHTML = `<div class="max-w-7xl mx-auto px-4 md:px-6 py-8 h-full overflow-y-auto custom-scroll pb-24"><div class="mb-6 text-center"><h2 class="text-2xl md:text-3xl font-bold text-slate-900">知識建構論壇 Knowledge Building Forum</h2><p class="text-slate-500 text-sm">"知識建構不是追求答案，而是以改善想法為共同使命，讓社群思維持續朝向更深刻的理解。"</p></div><div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4"><div class="w-full md:w-auto category-scroll-container"><div id="category-filters" class="flex gap-2 whitespace-nowrap md:flex-wrap">${window.app.generateCategoryFilters()}</div></div>${window.state.user.role === window.ROLES.LEAD ? `<button onclick="window.app.openCreateTopic()" class="bg-indigo-600 text-white px-5 py-2 rounded-lg shadow text-sm hover:bg-indigo-700 transition flex-shrink-0"><i class="fa-solid fa-plus"></i> 新增主題</button>` : ''}</div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">${visibleTopics.length === 0 ? `<div class="col-span-full text-center text-slate-400 py-10">此分類暫無主題，點擊右上角新增一個吧！</div>` : ''}${visibleTopics.map(t => { 
-                const count = window.state.nodes.filter(n => n.topicId === t.id).length; 
-                const cats = t.categories || [t.category] || ['其他']; 
-                const tagsHtml = cats.map(c => `<span class="bg-indigo-50 text-indigo-700 px-2 py-1 rounded text-xs font-bold mr-1">${window.TOPIC_CATEGORIES[c] || c}</span>`).join(''); 
-                const adminControls = window.state.user.role === window.ROLES.LEAD ? `
-                    <div class="flex gap-2">
-                        <button onclick="event.stopPropagation(); window.app.openEditTopic('${t.id}')" class="text-slate-300 hover:text-indigo-500 transition" title="編輯主題"><i class="fa-solid fa-pen-to-square"></i></button>
-                        <button onclick="event.stopPropagation(); window.app.deleteTopic('${t.id}')" class="text-slate-300 hover:text-red-500 transition" title="刪除主題"><i class="fa-solid fa-trash"></i></button>
-                    </div>` : '';
-                return `<div onclick="window.app.enterTopic('${t.id}')" class="bg-white rounded-xl border p-5 cursor-pointer hover:shadow-lg relative overflow-hidden group transition"><div class="flex justify-between mb-3 items-start"><div class="flex flex-wrap gap-1">${tagsHtml}</div>${adminControls}</div><h3 class="font-bold text-lg mb-2 group-hover:text-indigo-600 transition">${t.name}</h3><p class="text-slate-500 text-sm mb-4 line-clamp-2">${t.desc}</p><div class="flex justify-between text-xs text-slate-400 pt-3 border-t"><span><i class="fa-solid fa-user"></i> ${window.state.userList[t.author] ? window.state.userList[t.author].name : 'Unknown'}</span><span>${count} 想法</span></div></div>`; 
-            }).join('')}</div></div>`;
-            setTimeout(() => { document.querySelectorAll('.filter-btn').forEach(button => { button.addEventListener('click', (e) => { window.app.setFilter(e.currentTarget.dataset.category); }); }); }, 0);
+            container.innerHTML = `
+            <div class="max-w-7xl mx-auto px-4 md:px-6 py-8 h-full overflow-y-auto custom-scroll pb-24">
+                <div class="mb-6 text-center">
+                    <h2 class="text-2xl md:text-3xl font-bold text-slate-900">知識建構論壇 Knowledge Building Forum</h2>
+                    <p class="text-slate-500 text-sm">"知識建構不是追求答案，而是以改善想法為共同使命，讓社群思維持續朝向更深刻的理解。"</p>
+                </div>
+                <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                    <div class="w-full md:w-auto category-scroll-container">
+                        <div id="category-filters" class="flex gap-2 whitespace-nowrap md:flex-wrap">
+                            ${window.app.generateCategoryFilters()}
+                        </div>
+                    </div>
+                    ${window.state.user.role === window.ROLES.LEAD ? `<button onclick="window.app.openCreateTopic()" class="bg-indigo-600 text-white px-5 py-2 rounded-lg shadow text-sm hover:bg-indigo-700 transition flex-shrink-0"><i class="fa-solid fa-plus"></i> 新增主題</button>` : ''}
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
+                    ${visibleTopics.length === 0 ? `<div class="col-span-full text-center text-slate-400 py-10">此分類暫無主題，點擊右上角新增一個吧！</div>` : ''}
+                    ${visibleTopics.map(t => { 
+                        const count = window.state.nodes.filter(n => n.topicId === t.id).length; 
+                        const cats = t.categories || [t.category] || ['其他']; 
+                        const tagsHtml = cats.map(c => `<span class="bg-indigo-50 text-indigo-700 px-2 py-1 rounded text-xs font-bold mr-1">${window.TOPIC_CATEGORIES[c] || c}</span>`).join(''); 
+                        const adminControls = window.state.user.role === window.ROLES.LEAD ? `
+                            <div class="flex gap-2">
+                                <button onclick="event.stopPropagation(); window.app.openEditTopic('${t.id}')" class="text-slate-300 hover:text-indigo-500 transition" title="編輯主題"><i class="fa-solid fa-pen-to-square"></i></button>
+                                <button onclick="event.stopPropagation(); window.app.deleteTopic('${t.id}')" class="text-slate-300 hover:text-red-500 transition" title="刪除主題"><i class="fa-solid fa-trash"></i></button>
+                            </div>` : '';
+                        return `
+                        <div onclick="window.app.enterTopic('${t.id}')" class="bg-white rounded-xl border p-5 cursor-pointer hover:shadow-lg relative overflow-hidden group transition">
+                            <div class="flex justify-between mb-3 items-start">
+                                <div class="flex flex-wrap gap-1">${tagsHtml}</div>
+                                ${adminControls}
+                            </div>
+                            <h3 class="font-bold text-lg mb-2 group-hover:text-indigo-600 transition">${t.name}</h3>
+                            <p class="text-slate-500 text-sm mb-4 line-clamp-2">${t.desc}</p>
+                            <div class="flex justify-between text-xs text-slate-400 pt-3 border-t">
+                                <span><i class="fa-solid fa-user"></i> ${window.state.userList[t.author] ? window.state.userList[t.author].name : 'Unknown'}</span>
+                                <span>${count} 想法</span>
+                            </div>
+                        </div>`; 
+                    }).join('')}
+                </div>
+            </div>`;
+            
+            setTimeout(() => { 
+                document.querySelectorAll('.filter-btn').forEach(button => { 
+                    button.addEventListener('click', (e) => { 
+                        window.app.setFilter(e.currentTarget.dataset.category); 
+                    }); 
+                }); 
+            }, 0);
         };
+        
         window.ui.renderCanvas = () => { 
             const topic = window.state.topics.find(t => t.id === window.state.currentTopicId);
             const nodes = window.state.nodes.filter(n => n.topicId === window.state.currentTopicId);
@@ -1459,8 +1719,8 @@
                 </button>
             </div>
 
-            <div class="absolute bottom-20 right-4 md:bottom-8 md:right-8 z-40"> 
-                <button onclick="window.app.openComposer(null)" class="bg-indigo-600 text-white rounded-full w-12 h-12 md:w-14 md:h-14 shadow-xl flex items-center justify-center text-xl transition transform hover:scale-105"><i class="fa-solid fa-plus"></i></button>
+            <div class="absolute bottom-20 right-4 md:bottom-8 md:right-8 z-40">
+                 <button onclick="window.app.openComposer(null)" class="bg-indigo-600 text-white rounded-full w-12 h-12 md:w-14 md:h-14 shadow-xl flex items-center justify-center text-xl transition transform hover:scale-105"><i class="fa-solid fa-plus"></i></button>
             </div>
             
             <div class="hidden md:block absolute bottom-24 left-4 md:bottom-8 md:left-24 z-30 pointer-events-none">
@@ -1473,13 +1733,13 @@
                 </div>
             </div>
 
-            <div id="canvas-wrapper" class="w-full h-full overflow-hidden relative touch-none noselect" 
+            <div id="canvas-wrapper" class="w-full h-full overflow-hidden relative touch-none noselect"  
                  style="cursor: ${isPanMode ? 'grab' : 'default'}"
                  ondblclick="window.app.canvas.handleDoubleClick(event)"
-                 onmousedown="window.app.canvas.startPan(event)" 
-                 ontouchstart="window.app.canvas.startPan(event)" 
-                 onmousemove="window.app.canvas.pan(event)" 
-                 ontouchmove="window.app.canvas.pan(event)" 
+                 onmousedown="window.app.canvas.startPan(event)"  
+                 ontouchstart="window.app.canvas.startPan(event)"  
+                 onmousemove="window.app.canvas.pan(event)"  
+                 ontouchmove="window.app.canvas.pan(event)"  
                  onwheel="window.app.canvas.handleWheel(event)">
                 <div id="canvas-bg"></div>
                 <div id="canvas-content" class="absolute top-0 left-0 w-full h-full origin-top-left will-change-transform">
@@ -1502,18 +1762,69 @@
             setTimeout(() => window.ui.drawConnections(nodes), 0);
             window.app.canvas.applyTransform();
         };
+        
         window.ui.renderProfile = () => {
             const container = document.getElementById('app-container');
             const u = window.state.user;
             // Added pb-24 for mobile nav clearance
-            container.innerHTML = `<div class="max-w-2xl mx-auto px-6 py-8 h-full overflow-y-auto custom-scroll pb-24"><div class="bg-gradient-to-br from-indigo-50 to-white rounded-2xl p-6 shadow-sm border border-indigo-100 text-center mb-6 relative overflow-hidden"><div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-400 via-purple-500 to-indigo-500"></div><img src="${u.avatar}" class="w-20 h-20 rounded-full mx-auto mb-3 border-4 border-white shadow-md"><h2 class="text-2xl font-bold text-slate-800">${u.name}</h2><p class="text-slate-500 text-sm mb-1">${u.role === window.ROLES.LEAD ? '首席研究員' : '協同研究員'}</p><div class="flex justify-center gap-2 mt-4"><span class="bg-white/80 border px-3 py-1 rounded-full text-xs font-bold text-slate-600 shadow-sm">ID: ${u.id}</span></div></div><div class="space-y-6"><div class="flex items-center justify-between"><h3 class="font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-robot text-indigo-600"></i> 我的知識建構檔案 (KB Profile)</h3><button onclick="window.app.generateAIProfile()" id="btn-gen-profile" class="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition flex items-center gap-2"><i class="fa-solid fa-wand-magic-sparkles"></i> <span>生成分析</span></button></div><div id="ai-loading" class="hidden p-8 text-center bg-white rounded-2xl border border-slate-100"><div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-2"></div><p class="text-sm text-slate-500 animate-pulse">正在回顧你的知識演化軌跡...</p></div><div id="ai-profile-result" class="hidden space-y-4"></div></div></div>`;
-            if (window.state.profile && document.getElementById('ai-profile-result')) { window.ui.renderProfileContent(window.state.profile); }
+            container.innerHTML = `
+            <div class="max-w-2xl mx-auto px-6 py-8 h-full overflow-y-auto custom-scroll pb-24">
+                <div class="bg-gradient-to-br from-indigo-50 to-white rounded-2xl p-6 shadow-sm border border-indigo-100 text-center mb-6 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-400 via-purple-500 to-indigo-500"></div>
+                    <img src="${u.avatar}" class="w-20 h-20 rounded-full mx-auto mb-3 border-4 border-white shadow-md">
+                    <h2 class="text-2xl font-bold text-slate-800">${u.name}</h2>
+                    <p class="text-slate-500 text-sm mb-1">${u.role === window.ROLES.LEAD ? '首席研究員' : '協同研究員'}</p>
+                    <div class="flex justify-center gap-2 mt-4">
+                        <span class="bg-white/80 border px-3 py-1 rounded-full text-xs font-bold text-slate-600 shadow-sm">ID: ${u.id}</span>
+                    </div>
+                </div>
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-robot text-indigo-600"></i> 我的知識建構檔案 (KB Profile)</h3>
+                        <button onclick="window.app.generateAIProfile()" id="btn-gen-profile" class="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition flex items-center gap-2"><i class="fa-solid fa-wand-magic-sparkles"></i> <span>生成分析</span></button>
+                    </div>
+                    <div id="ai-loading" class="hidden p-8 text-center bg-white rounded-2xl border border-slate-100">
+                        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-2"></div>
+                        <p class="text-sm text-slate-500 animate-pulse">正在回顧你的知識演化軌跡...</p>
+                    </div>
+                    <div id="ai-profile-result" class="hidden space-y-4"></div>
+                </div>
+            </div>`;
+            
+            if (window.state.profile && document.getElementById('ai-profile-result')) { 
+                window.ui.renderProfileContent(window.state.profile); 
+            }
         };
+        
         window.ui.renderProfileContent = (data) => {
             const result = document.getElementById('ai-profile-result');
-            result.innerHTML = `<div class="animate-fade-in bg-white p-5 rounded-xl shadow-sm border-l-4 border-indigo-500 relative overflow-hidden"><div class="absolute right-0 top-0 opacity-5 transform translate-x-4 -translate-y-4"><i class="fa-solid ${data.icon} text-9xl text-indigo-900"></i></div><h4 class="text-sm font-bold text-indigo-500 uppercase tracking-wider mb-3 flex items-center gap-2"><i class="fa-solid fa-fire"></i> 使用者知識角色</h4><div class="relative z-10"><p class="text-xl font-bold text-slate-800 mb-2">${data.role}</p><p class="text-sm text-slate-600 leading-relaxed">${data.desc}</p></div></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div class="animate-fade-in bg-white p-5 rounded-xl shadow-sm border-l-4 border-green-500" style="animation-delay: 0.1s"><h4 class="text-sm font-bold text-green-600 uppercase tracking-wider mb-4 flex items-center gap-2"><i class="fa-solid fa-seedling"></i> 想法演化軌跡</h4><div class="pl-2">${data.trajectoryHTML}</div></div><div class="animate-fade-in bg-white p-5 rounded-xl shadow-sm border-l-4 border-blue-500" style="animation-delay: 0.2s"><h4 class="text-sm font-bold text-blue-600 uppercase tracking-wider mb-4 flex items-center gap-2"><i class="fa-solid fa-puzzle-piece"></i> 社群推動力</h4>${data.communityHTML}</div></div><div class="animate-fade-in bg-white p-5 rounded-xl shadow-sm border-l-4 border-purple-500" style="animation-delay: 0.3s"><h4 class="text-sm font-bold text-purple-600 uppercase tracking-wider mb-4 flex items-center gap-2"><i class="fa-solid fa-chart-pie"></i> 知識建構策略分佈</h4><p class="text-xs text-slate-500 mb-4">這顯示了你在知識建構過程中所使用的認知策略多樣性 (Idea Diversity)：</p><div class="grid grid-cols-1 gap-2">${data.statsHTML}</div></div>`;
+            result.innerHTML = `
+            <div class="animate-fade-in bg-white p-5 rounded-xl shadow-sm border-l-4 border-indigo-500 relative overflow-hidden">
+                <div class="absolute right-0 top-0 opacity-5 transform translate-x-4 -translate-y-4"><i class="fa-solid ${data.icon} text-9xl text-indigo-900"></i></div>
+                <h4 class="text-sm font-bold text-indigo-500 uppercase tracking-wider mb-3 flex items-center gap-2"><i class="fa-solid fa-fire"></i> 使用者知識角色</h4>
+                <div class="relative z-10">
+                    <p class="text-xl font-bold text-slate-800 mb-2">${data.role}</p>
+                    <p class="text-sm text-slate-600 leading-relaxed">${data.desc}</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="animate-fade-in bg-white p-5 rounded-xl shadow-sm border-l-4 border-green-500" style="animation-delay: 0.1s">
+                    <h4 class="text-sm font-bold text-green-600 uppercase tracking-wider mb-4 flex items-center gap-2"><i class="fa-solid fa-seedling"></i> 想法演化軌跡</h4>
+                    <div class="pl-2">${data.trajectoryHTML}</div>
+                </div>
+                <div class="animate-fade-in bg-white p-5 rounded-xl shadow-sm border-l-4 border-blue-500" style="animation-delay: 0.2s">
+                    <h4 class="text-sm font-bold text-blue-600 uppercase tracking-wider mb-4 flex items-center gap-2"><i class="fa-solid fa-puzzle-piece"></i> 社群推動力</h4>
+                    ${data.communityHTML}
+                </div>
+            </div>
+            <div class="animate-fade-in bg-white p-5 rounded-xl shadow-sm border-l-4 border-purple-500" style="animation-delay: 0.3s">
+                <h4 class="text-sm font-bold text-purple-600 uppercase tracking-wider mb-4 flex items-center gap-2"><i class="fa-solid fa-chart-pie"></i> 知識建構策略分佈</h4>
+                <p class="text-xs text-slate-500 mb-4">這顯示了你在知識建構過程中所使用的認知策略多樣性 (Idea Diversity)：</p>
+                <div class="grid grid-cols-1 gap-2">${data.statsHTML}</div>
+            </div>`;
             result.classList.remove('hidden');
         };
+        
         window.ui.drawNodes = (nodes) => {
             document.getElementById('nodes-layer').innerHTML = nodes.map(node => {
                 const s = window.SCAFFOLDS[node.type];
@@ -1523,25 +1834,67 @@
                 const heatmapClass = isPromising ? 'promising-node' : '';
                 const flameBadge = isPromising ? `<div class="absolute -top-3 -right-2 bg-orange-500 text-white text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm animate-bounce-slow z-50"><i class="fa-solid fa-fire"></i> 熱點</div>` : '';
                 const isSelected = window.state.selectedNodeIds.includes(node.id) ? 'selected-node' : '';
-                return `<div id="node-${node.id}" class="absolute node-card w-64 md:w-72 bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-visible ${heatmapClass} ${isSelected}" style="left: ${node.x}px; top: ${node.y}px;" onmousedown="event.stopPropagation(); window.app.canvas.startDrag(event, '${node.id}')" ontouchstart="event.stopPropagation(); window.app.canvas.startDrag(event, '${node.id}')" ondblclick="event.stopPropagation(); window.app.openNodeDetail('${node.id}')">${flameBadge}<div class="px-3 py-2 ${s.bgSoft} border-b ${s.border} flex justify-between items-center cursor-move rounded-t-xl"><div class="flex items-center gap-2"><span class="w-5 h-5 rounded-full ${s.color} text-white flex justify-center items-center text-xs"><i class="fa-solid ${s.icon}"></i></span><span class="text-xs font-bold ${s.text}">${s.label}</span></div><div class="flex gap-1"><button onclick="event.stopPropagation(); window.app.openNodeDetail('${node.id}')" class="w-8 h-8 rounded hover:bg-white/50 text-slate-500 flex justify-center items-center"><i class="fa-solid fa-eye"></i></button><button onclick="event.stopPropagation(); window.app.openComposer('${node.id}')" class="w-8 h-8 rounded hover:bg-white/50 text-slate-500 flex justify-center items-center"><i class="fa-solid fa-reply"></i></button>${canDel ? `<button onclick="event.stopPropagation(); window.app.deleteNode('${node.id}')" class="w-8 h-8 rounded hover:bg-white/50 text-slate-500 hover:text-red-500 flex justify-center items-center"><i class="fa-solid fa-xmark"></i></button>` : ''}</div></div><div class="p-3 text-sm text-slate-700 leading-relaxed min-h-[60px] pointer-events-none bg-white"><h4 class="font-bold mb-1 text-slate-900 block truncate text-base">${node.title || '無標題'}</h4><p class="line-clamp-2 text-slate-600">${node.content}</p></div><div class="px-3 py-2 bg-slate-50 border-t flex justify-between text-[10px] text-slate-500 items-center rounded-b-xl"><div class="flex items-center gap-2"><img src="${user.avatar}" class="w-4 h-4 rounded-full"><span>${user.name}</span></div><span>${new Date(node.date).toLocaleDateString()}</span></div></div>`;
+                return `
+                <div id="node-${node.id}" class="absolute node-card w-64 md:w-72 bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-visible ${heatmapClass} ${isSelected}" style="left: ${node.x}px; top: ${node.y}px;" onmousedown="event.stopPropagation(); window.app.canvas.startDrag(event, '${node.id}')" ontouchstart="event.stopPropagation(); window.app.canvas.startDrag(event, '${node.id}')" ondblclick="event.stopPropagation(); window.app.openNodeDetail('${node.id}')">
+                    ${flameBadge}
+                    <div class="px-3 py-2 ${s.bgSoft} border-b ${s.border} flex justify-between items-center cursor-move rounded-t-xl">
+                        <div class="flex items-center gap-2">
+                            <span class="w-5 h-5 rounded-full ${s.color} text-white flex justify-center items-center text-xs"><i class="fa-solid ${s.icon}"></i></span>
+                            <span class="text-xs font-bold ${s.text}">${s.label}</span>
+                        </div>
+                        <div class="flex gap-1">
+                            <button onclick="event.stopPropagation(); window.app.openNodeDetail('${node.id}')" class="w-8 h-8 rounded hover:bg-white/50 text-slate-500 flex justify-center items-center"><i class="fa-solid fa-eye"></i></button>
+                            <button onclick="event.stopPropagation(); window.app.openComposer('${node.id}')" class="w-8 h-8 rounded hover:bg-white/50 text-slate-500 flex justify-center items-center"><i class="fa-solid fa-reply"></i></button>
+                            ${canDel ? `<button onclick="event.stopPropagation(); window.app.deleteNode('${node.id}')" class="w-8 h-8 rounded hover:bg-white/50 text-slate-500 hover:text-red-500 flex justify-center items-center"><i class="fa-solid fa-xmark"></i></button>` : ''}
+                        </div>
+                    </div>
+                    <div class="p-3 text-sm text-slate-700 leading-relaxed min-h-[60px] pointer-events-none bg-white">
+                        <h4 class="font-bold mb-1 text-slate-900 block truncate text-base">${node.title || '無標題'}</h4>
+                        <p class="line-clamp-2 text-slate-600">${node.content}</p>
+                    </div>
+                    <div class="px-3 py-2 bg-slate-50 border-t flex justify-between text-[10px] text-slate-500 items-center rounded-b-xl">
+                        <div class="flex items-center gap-2">
+                            <img src="${user.avatar}" class="w-4 h-4 rounded-full">
+                            <span>${user.name}</span>
+                        </div>
+                        <span>${new Date(node.date).toLocaleDateString()}</span>
+                    </div>
+                </div>`;
             }).join('');
         };
+        
         window.ui.drawConnections = (nodes) => { 
             const layer = document.getElementById('connections-layer');
             if(!layer) return;
-            layer.innerHTML = `<defs>${Object.keys(window.SCAFFOLDS).map(k => { const c = { question: '#3b82f6', extend: '#eab308', improve: '#22c55e', counter: '#ef4444', riseabove: '#a855f7' }[k]; return `<marker id="arrow-${k}" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="${c}" /></marker>`; }).join('')}</defs>`;
+            layer.innerHTML = `<defs>${Object.keys(window.SCAFFOLDS).map(k => { 
+                const c = { question: '#3b82f6', extend: '#eab308', improve: '#22c55e', counter: '#ef4444', riseabove: '#a855f7' }[k]; 
+                return `<marker id="arrow-${k}" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="${c}" /></marker>`; 
+            }).join('')}</defs>`;
+            
             const cardWidth = window.innerWidth < 768 ? 256 : 288;
             const halfW = cardWidth / 2;
+            
             const paths = nodes.filter(n => n.parentId).map(node => {
                 const parent = window.state.nodes.find(p => p.id === node.parentId);
                 if (!parent) return '';
-                const startX = parent.x + halfW; const startY = parent.y + 140; const endX = node.x + halfW; const endY = node.y;
+                const startX = parent.x + halfW; 
+                const startY = parent.y + 140; 
+                const endX = node.x + halfW; 
+                const endY = node.y;
+                
                 const dist = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
-                let curveFactor = 0.4; if (endY < startY) curveFactor = 0.6; 
-                const cp1x = startX; const cp1y = startY + dist * curveFactor; const cp2x = endX; const cp2y = endY - dist * curveFactor;
+                let curveFactor = 0.4; 
+                if (endY < startY) curveFactor = 0.6; 
+                
+                const cp1x = startX; 
+                const cp1y = startY + dist * curveFactor; 
+                const cp2x = endX; 
+                const cp2y = endY - dist * curveFactor;
                 const colorMap = { question: '#3b82f6', extend: '#eab308', improve: '#22c55e', counter: '#ef4444', riseabove: '#a855f7' };
+                
                 return `<path d="M ${startX} ${startY} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${endX} ${endY}" stroke="${colorMap[node.type]}" fill="none" stroke-width="2" stroke-opacity="0.6" marker-end="url(#arrow-${node.type})" />`;
             }).join('');
+            
             layer.innerHTML += paths;
         };
 
@@ -1553,5 +1906,6 @@
             }
         });
     </script>
+    <script async data-explicit-opt-in="true" data-cookie-opt-in="true" data-deployment-id="dpl_9RLRsCafPtrzbyED6G6LKCapvJtC" src="https://vercel.live/_next-live/feedback/feedback.js"></script>
 </body>
 </html>
